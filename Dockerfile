@@ -1,10 +1,12 @@
-# causewise has no runtime npm dependencies: Node runs the TypeScript sources
-# directly and SQLite is built in (ADR 0007).
+# Node runs the TypeScript sources directly and SQLite is built in (ADR 0007).
+# The only runtime package is the Anthropic SDK (ADR 0009).
 ARG NODE_IMAGE=node:22-alpine
 FROM ${NODE_IMAGE}
 WORKDIR /app
-COPY package.json ./
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
 COPY src ./src
+COPY prompts ./prompts
 ENV NODE_ENV=production \
     CAUSEWISE_HOST=0.0.0.0 \
     CAUSEWISE_DB=/data/causewise.db
