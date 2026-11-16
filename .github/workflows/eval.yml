@@ -1,0 +1,73 @@
+name: Eval
+# Runs the investigator on the golden dataset against a Zabbix lab started in
+# the job. Calls the Claude API with the repository secret ANTHROPIC_API_KEY,
+# so it costs money and only runs when started by hand.
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: Runs per incident (thresholds are defined over 3)
+        default: '1'
+      max_usd:
+        description: Stop starting investigations once estimated spend reaches this many US dollars
+        default: '5'
+      model:
+        description: Claude model ID
+        default: claude-opus-5-5
+      effort:
+        description: low, medium, high, xhigh or max
+        default: medium
+      baseline:
+        description: Also run the alerts-only baseline (roughly doubles the number of investigations)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check the API key is configured
+        run: test -n "$ANTHROPIC_API_KEY" || { echo "Add the repository secret ANTHROPIC_API_KEY first."; exit 1; }
+      - name: Start Zabbix 7.0
+        run: |
+          docker compose -f lab/docker-compose.yml up -d db70 server70 web70
+          for i in $(seq 1 60); do
+            curl -fsS -X POST -H 'Content-Type: application/json-rpc' -d '{"jsonrpc":"2.0","method":"apiinfo.version","params":{},"id":1}' http://127.0.0.1:8070/api_jsonrpc.php | grep -q result && exit 0
+            sleep 5
+          done
+          docker compose -f lab/docker-compose.yml logs --tail 50; exit 1
+      - name: Create the simulated estate and replay the dataset
+        run: |
+          node sim/provision.mjs 7.0
+          sleep 30
+          node sim/replay.mjs 7.0 golden
+      - name: Run the investigator
+        run: npm run eval -- --lab 7.0 --set golden --runs "${{ inputs.runs }}" --max-usd "${{ inputs.max_usd }}" --model "${{ inputs.model }}" --effort "${{ inputs.effort }}" --out evals/runs/investigator
+      - name: Run the alerts-only baseline
+        if: ${{ inputs.baseline }}
+        run: npm run eval -- --baseline --lab 7.0 --set golden --runs "${{ inputs.runs }}" --max-usd "${{ inputs.max_usd }}" --model "${{ inputs.model }}" --effort "${{ inputs.effort }}" --out evals/runs/baseline
+      - name: Summary
+        if: always()
+        run: |
+          for f in evals/runs/*/summary.json; do
+            [ -f "$f" ] || continue
+            echo "### $(dirname "$f" | xargs basename)" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            node -e "const j=require('./$f');console.log(JSON.stringify({...j.summary,thresholds:j.thresholds,thresholds_apply:j.thresholds_apply},null,2))" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results
+          path: evals/runs/

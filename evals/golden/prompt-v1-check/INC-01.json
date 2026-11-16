@@ -1,0 +1,61 @@
+{
+  "incident": "INC-01",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "cache-01",
+      "what": "The cache service or agent on cache-01 stopped reporting at about 18:19 while the host still answers ping. There is no alert on this. Cache requests now fall through to db-01, which overloads it and slows the app and web tiers.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "nas-01 storage: latency 2.81 ms, IOPS 1710, ping OK, and db-01 IO wait is only 4%",
+    "hv-01 hypervisor: CPU ready 1.7%, CPU 50%, ping OK",
+    "Network or switch fault: db-01, cache-01 and nas-01 have 0% ICMP loss",
+    "App-tier host resource problem: app-03 CPU 22%, memory 56%, no DB errors",
+    "db-01 disk or replication: fs.data 62%, replication lag 2.7 s",
+    "Maintenance window: none active"
+  ],
+  "evidence": [
+    {
+      "claim": "cache-01 cache.hit.pct, cache.resp.ms, cpu.util.pct and mem.util.pct are all marked STOPPED REPORTING, with the last sample about 7 minutes ago (about 18:19), while icmp.ping=1 and loss 0%",
+      "query": 4
+    },
+    {
+      "claim": "cache-01 cache.hit.pct was a steady 89-94% until its last sample at 18:19:17, then no data",
+      "query": 6
+    },
+    {
+      "claim": "cache-01 has triggers for low hit ratio and slow response, but both need data, so a stopped service raises no alert. This is why the cause is silent.",
+      "query": 7
+    },
+    {
+      "claim": "db-01 db.conn.count jumped from about 60 to 193 at 18:20:54, about 90 seconds after the cache stopped reporting, and has stayed near 185-190",
+      "query": 5
+    },
+    {
+      "claim": "db-01 slow queries rate rose from 0.66 at 18:19:23 to 14.9 at 18:20:23 and stays at 14-17. db-01 CPU is 80%.",
+      "query": 11
+    },
+    {
+      "claim": "The Slow application response alerts (app-01 to app-04) and Slow HTTP response alerts (web-01 to web-04) all opened between 18:21:20 and 18:21:56, after the db-01 change. app-03 shows app.resp.ms 1902.",
+      "query": 10
+    },
+    {
+      "claim": "Open problems are only app and web slowness plus db-01 'Too many database connections' (warning). There is no alert on cache-01.",
+      "query": 1
+    },
+    {
+      "claim": "nas-01 latency is 2.81 ms and db-01 IO wait is 4%, so storage is healthy",
+      "query": 4
+    },
+    {
+      "claim": "hv-01 CPU ready is 1.71% and CPU is 49.6%, so the hypervisor is healthy",
+      "query": 8
+    }
+  ],
+  "next_step": "Log in to cache-01 and check whether the cache process and the Zabbix agent are running. Restart the cache service if it is down, then watch whether db-01 connections fall back to about 60.",
+  "model": "claude-sonnet-5-5",
+  "note": "Run through the Claude Code harness with prompts/investigator/v1.md and tools/zq.mjs; not the product loop."
+}

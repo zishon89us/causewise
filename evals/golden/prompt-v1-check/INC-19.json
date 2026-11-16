@@ -1,0 +1,69 @@
+{
+  "incident": "INC-19",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "cache-01",
+      "what": "The cache service failed at about 18:20: hit ratio fell from ~91% to 0 and cache.resp.ms stopped reporting, while the host still answers ping. Reads now fall through to the primary database (db-01), whose CPU tripled, and this is the likely cause of the app and web slowness.",
+      "confidence": "medium"
+    },
+    {
+      "high_note": "second independent fault",
+      "host": "db-02",
+      "what": "The replica has its own I/O problem that began at 18:18, before the cache failure. I/O wait went from ~5% to ~30%, replication lag rose from ~3s to 400s and CPU is at 92%. Its root cause is not visible in Zabbix.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "nas-01 storage (latency 2.71 ms, normal IOPS, answering ping)",
+    "Network and host reachability on db-01, db-02 and cache-01 (0% loss, ping OK)",
+    "db-01 disk I/O (iowait 2.26%) and memory (56%): its load is CPU only",
+    "Disk space on db-01 and db-02 (fs.data about 62%)",
+    "Maintenance window (none active)",
+    "Application-side DB errors (app.db.errors.rate 0 on app-01)",
+    "Memory or CPU saturation on cache-01 (CPU 21%, mem 57%)",
+    "The cache failure as the cause of db-02's trouble: db-02 degraded at 18:18, before the cache dropped at 18:20"
+  ],
+  "evidence": [
+    {
+      "claim": "cache-01 cache.hit.pct was 90-94% through 18:19:18, then 0 from 18:20:18 onward",
+      "query": 4
+    },
+    {
+      "claim": "cache-01 cache.resp.ms is marked STOPPED REPORTING, last value 6m ago, while icmp.ping=1 and CPU is 21%",
+      "query": 6
+    },
+    {
+      "claim": "db-01 CPU jumped from ~19-27% to 72% at 18:20:58 and stays at ~66-71%, 1 minute after the cache drop",
+      "query": 8
+    },
+    {
+      "claim": "db-02 io.wait rose from ~4.7% at 18:17 to 28.5% at 18:18:19 and has stayed at 26-34%",
+      "query": 5
+    },
+    {
+      "claim": "db-02 replication lag went from 2.7s at 18:17 to 28.5s at 18:18, then 128s, 227s, 327s and 400s from 18:22, i.e. onset at 18:18, before the cache failure",
+      "query": 9
+    },
+    {
+      "claim": "db-02 slow queries rose from 0.85 to 33 at 18:18:52, so it was already degraded before cache-01 dropped",
+      "query": 12
+    },
+    {
+      "claim": "nas-01 latency is 2.71 ms with ping OK, and no maintenance is active",
+      "query": 10
+    },
+    {
+      "claim": "app-01 app.resp.ms is 1837 ms with 0 DB errors, so the app is slow but not failing",
+      "query": 13
+    },
+    {
+      "claim": "The 12 open alerts begin at 18:20, with the db-02 CPU alert first; the app and web alerts follow at 18:21",
+      "query": 1
+    }
+  ],
+  "next_step": "Check the cache service on cache-01 (process, logs, memory limit and restart or crash at about 18:20) and restore it. Separately, check db-02's own storage or hypervisor I/O, since its I/O wait began at 18:18, and check whether the replica reads from storage that is not recorded in the host tags.",
+  "model": "claude-sonnet-5-5",
+  "note": "Run through the Claude Code harness with prompts/investigator/v1.md and tools/zq.mjs; not the product loop."
+}

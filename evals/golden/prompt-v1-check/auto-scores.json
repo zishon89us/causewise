@@ -1,0 +1,67 @@
+{
+  "dataset": "golden",
+  "source": "evals/golden/prompt-v1-check",
+  "scorer": "src/eval/score.ts",
+  "totals": {
+    "incidents": 6,
+    "cause_accuracy": "6/6",
+    "false_blame_incidents": 0,
+    "unrelated_separation": "0/0"
+  },
+  "rows": [
+    {
+      "id": "INC-01",
+      "scenario": "cache-hung-stale-metrics",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": []
+    },
+    {
+      "id": "INC-11",
+      "scenario": "deploy-and-dns-concurrent",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": []
+    },
+    {
+      "id": "INC-13",
+      "scenario": "hypervisor-02-contention [no tags]",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": []
+    },
+    {
+      "id": "INC-15",
+      "scenario": "external-dependency-not-monitored",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": []
+    },
+    {
+      "id": "INC-19",
+      "scenario": "two-independent-faults",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": []
+    },
+    {
+      "id": "INC-20",
+      "scenario": "resolved-link-flap-backlog",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": []
+    }
+  ]
+}

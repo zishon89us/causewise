@@ -1,0 +1,70 @@
+{
+  "incident": "INC-15",
+  "verdict": "undetermined",
+  "causes": [],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "App tier (app-01: db errors 0, resp 299 ms, queue 34, CPU 30%; resp.ms flat 300-400 ms through onset)",
+    "Database db-01 (IO wait 5%, repl lag 3.6 s, slow queries 1.2/s, CPU 32%)",
+    "Cache cache-01 (hit 89.6%, resp 3.2 ms)",
+    "Switch dist-sw-01 (uplink up, if.errors 0.2-0.9/s, flat, no loss)",
+    "Hypervisor hv-02 (CPU ready 1.5%, util 46%)",
+    "DNS dns-01 (12 ms)",
+    "Resource exhaustion on web-01 (CPU 20%, mem 57%, disk 40%)",
+    "Load balancer backend loss (lb-01 healthy backends 4 of 4)",
+    "Maintenance window (none active)"
+  ],
+  "evidence": [
+    {
+      "claim": "5 open problems, all 5xx alerts: web-01..04 and lb-01, all opened 02:21:20-02:21:49 UTC; no alert on app, db, cache, network or hypervisor hosts",
+      "query": 1
+    },
+    {
+      "claim": "No other trigger events in the prior 30 min",
+      "query": 2
+    },
+    {
+      "claim": "web-01 http.5xx.pct jumped from about 0.1-0.3% to 26.6% at 02:20:22 and has stayed at about 30% (32.6% at 02:25:22); step change, not a ramp",
+      "query": 11
+    },
+    {
+      "claim": "lb-01 lb.5xx.pct 28.4% with all 4 backends reported healthy, so the 5xx come from the web tier behind it",
+      "query": 8
+    },
+    {
+      "claim": "app-01 and the other checked dependencies show normal values and no change at 02:20",
+      "query": 4
+    },
+    {
+      "claim": "db-01 metrics normal",
+      "query": 6
+    },
+    {
+      "claim": "cache-01 metrics normal",
+      "query": 5
+    },
+    {
+      "claim": "app-01 response time shows no rise around 02:20 (313 ms at 02:20:45, 298 ms at 02:25:45)",
+      "query": 15
+    },
+    {
+      "claim": "app.version is 412 on app-01 and app-03 throughout the last hour, so no app deploy in that window (version metric sampled every 5 min)",
+      "query": 12
+    },
+    {
+      "claim": "web-01 and web-03/web-04 sit on different distribution switches' hypervisors (hv-02 for web-03/04), and hv-02 and dist-sw-01 are healthy",
+      "query": 17
+    },
+    {
+      "claim": "web-01 has a High HTTP 5xx trigger but no trigger or metric for web server config, version or upstream errors, so a web-tier change is not visible",
+      "query": 14
+    },
+    {
+      "claim": "No maintenance window active",
+      "query": 10
+    }
+  ],
+  "next_step": "Check what changed on the web tier (web-01..04) at about 02:20 UTC: a deploy or config push, expired certificate, or failing upstream/backend config in the web server error logs and change log. Zabbix shows no metric for this. I only queried app-01, cache-01 and db-01 directly, so also look at app-02..04 logs and at the web-to-app connection errors.",
+  "model": "claude-sonnet-5-5",
+  "note": "Run through the Claude Code harness with prompts/investigator/v1.md and tools/zq.mjs; not the product loop."
+}
