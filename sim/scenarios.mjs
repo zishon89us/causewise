@@ -7,6 +7,13 @@
 //   null      -> no data (the host or check is not reporting)
 //   number    -> the value to report (noise is added by the caller's `rnd`)
 //
+// truth, read by the scorer (src/eval/score.ts via sim/dataset.mjs):
+//   kind      'fault' (default), 'benign' or 'undeterminable'
+//   hosts     the cause; any one of them names it
+//   causes    for independent faults: one list per fault, each needing a hit
+//   alsoOk    hosts that may be named alongside the cause without penalty
+//   unrelated hosts whose open alerts have nothing to do with the fault
+//
 // THIS FILE CONTAINS THE ANSWERS. An investigator under evaluation must not
 // read it.
 import { namesByRole } from './topology.mjs';
@@ -21,7 +28,7 @@ const j = (rnd, v, spread) => v + (rnd() * 2 - 1) * spread;
 export const scenarios = [
   {
     name: 'switch-uplink-down',
-    truth: { hosts: ['dist-sw-02'], summary: 'The link between core-rtr-01 and dist-sw-02 failed, cutting off everything behind dist-sw-02 (app, db, cache, hv-01). Web and load-balancer errors are symptoms.' },
+    truth: { alsoOk: ['core-rtr-01'], hosts: ['dist-sw-02'], summary: 'The link between core-rtr-01 and dist-sw-02 failed, cutting off everything behind dist-sw-02 (app, db, cache, hv-01). Web and load-balancer errors are symptoms.' },
     effect(host, key, t, rnd) {
       if (t < 0) return;
       if (BEHIND_SW02.includes(host)) {
@@ -94,7 +101,7 @@ export const scenarios = [
   },
   {
     name: 'app-memory-leak',
-    truth: { hosts: ['app-03'], summary: 'app-03 has a memory leak: memory climbed for an hour, then the process began crash-looping (memory sawtooth), making app-03 slow. The low-disk alert on web-02 is older and unrelated.' },
+    truth: { unrelated: ['web-02'], hosts: ['app-03'], summary: 'app-03 has a memory leak: memory climbed for an hour, then the process began crash-looping (memory sawtooth), making app-03 slow. The low-disk alert on web-02 is older and unrelated.' },
     effect(host, key, t, rnd) {
       if (host === 'web-02' && key === 'fs.root.pct' && t >= -2400) return 91.5;
       if (host === 'app-03' && key === 'mem.util.pct') {
@@ -142,7 +149,7 @@ export const scenarios = [
   },
   {
     name: 'two-independent-faults',
-    truth: { hosts: ['cache-01', 'db-02'], summary: 'Two unrelated faults. (1) The cache service on cache-01 stopped (hit ratio 0, no response-time data), so every request hits the database and the app and web tiers slowed. (2) db-02, the replica, is overloaded by its own workload (CPU about 93%, slow queries) and is lagging; nothing depends on it in this incident.' },
+    truth: { causes: [['cache-01'], ['db-02']], hosts: ['cache-01', 'db-02'], summary: 'Two unrelated faults. (1) The cache service on cache-01 stopped (hit ratio 0, no response-time data), so every request hits the database and the app and web tiers slowed. (2) db-02, the replica, is overloaded by its own workload (CPU about 93%, slow queries) and is lagging; nothing depends on it in this incident.' },
     effect(host, key, t, rnd) {
       if (host === 'db-02' && t >= -120) {
         if (key === 'db.repl.lag.s') return ramp(t, -120, 120, 2, 400);
@@ -162,7 +169,7 @@ export const scenarios = [
   },
   {
     name: 'load-balancer-health-checks',
-    truth: { hosts: ['lb-01'], summary: 'lb-01 marked all four backends unhealthy and returns 5xx for everything, while the web servers themselves are healthy (normal response times, no errors). The fault is on the load balancer (health check or configuration). The high-CPU alert on db-02 started 15 minutes earlier and is unrelated.' },
+    truth: { unrelated: ['db-02'], hosts: ['lb-01'], summary: 'lb-01 marked all four backends unhealthy and returns 5xx for everything, while the web servers themselves are healthy (normal response times, no errors). The fault is on the load balancer (health check or configuration). The high-CPU alert on db-02 started 15 minutes earlier and is unrelated.' },
     effect(host, key, t, rnd) {
       if (host === 'db-02' && key === 'cpu.util.pct' && t >= -900) return j(rnd, 95, 2);
       if (host === 'db-02' && key === 'db.io.wait.pct' && t >= -900) return j(rnd, 30, 4);
@@ -223,7 +230,7 @@ export const scenarios = [
   },
   {
     name: 'deploy-and-dns-concurrent',
-    truth: { hosts: ['dns-01', ...APP], require: 'dns-and-deploy', summary: 'Two faults at once. (1) dns-01 is overloaded and resolving slowly, which makes app and web responses slow. (2) A rolling deployment of build 413 across the app tier is causing database errors and 5xx. Neither explains the other.' },
+    truth: { causes: [['dns-01'], APP], hosts: ['dns-01', ...APP], summary: 'Two faults at once. (1) dns-01 is overloaded and resolving slowly, which makes app and web responses slow. (2) A rolling deployment of build 413 across the app tier is causing database errors and 5xx. Neither explains the other.' },
     effect(host, key, t, rnd) {
       const dns = t >= 0;
       const deployed = (n) => t >= -60 + n * 90;
@@ -243,7 +250,7 @@ export const scenarios = [
   },
   {
     name: 'resolved-link-flap-backlog',
-    truth: { hosts: ['core-rtr-01', 'dist-sw-01'], require: 'any', summary: 'The link between core-rtr-01 and dist-sw-01 went down for two minutes and came back. By the time of the page that alert has resolved. What remains is the aftermath: a retry storm left the app job queues backed up and the app and web tiers slow. The cause is the link flap, visible only in the event history.' },
+    truth: { hosts: ['core-rtr-01', 'dist-sw-01'], summary: 'The link between core-rtr-01 and dist-sw-01 went down for two minutes and came back. By the time of the page that alert has resolved. What remains is the aftermath: a retry storm left the app job queues backed up and the app and web tiers slow. The cause is the link flap, visible only in the event history.' },
     effect(host, key, t, rnd) {
       if (t < 0) return;
       const down = t < 120;
@@ -266,7 +273,7 @@ export const scenarios = [
   },
   {
     name: 'noisy-estate-hidden-cause',
-    truth: { hosts: ['hv-01'], summary: 'Same fault as hypervisor-cpu-contention (hv-01 CPU ready about 35%, no trigger), but three older, unrelated alerts are open: low disk on web-01, high CPU on db-02 and high memory on app-04. None of them is the cause.' },
+    truth: { unrelated: ['web-01', 'db-02', 'app-04'], hosts: ['hv-01'], summary: 'Same fault as hypervisor-cpu-contention (hv-01 CPU ready about 35%, no trigger), but three older, unrelated alerts are open: low disk on web-01, high CPU on db-02 and high memory on app-04. None of them is the cause.' },
     effect(host, key, t, rnd) {
       if (host === 'web-01' && key === 'fs.root.pct' && t >= -3000) return 92;
       if (host === 'db-02' && key === 'cpu.util.pct' && t >= -1800) return j(rnd, 94, 2);

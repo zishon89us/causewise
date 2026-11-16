@@ -1,0 +1,156 @@
+{
+  "dataset": "golden",
+  "source": "evals/golden/pilot",
+  "scorer": "src/eval/score.ts",
+  "totals": {
+    "incidents": 14,
+    "cause_accuracy": "13/14",
+    "false_blame_incidents": 0,
+    "unrelated_separation": "1/1",
+    "disagreements_with_hand_score": []
+  },
+  "rows": [
+    {
+      "id": "INC-01",
+      "scenario": "cache-hung-stale-metrics",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-03",
+      "scenario": "switch-uplink-down [no tags]",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-05",
+      "scenario": "noisy-estate-hidden-cause",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "pass",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-07",
+      "scenario": "storage-latency [no tags]",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-08",
+      "scenario": "storage-degraded-below-threshold",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-10",
+      "scenario": "benign-cpu-spike",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-11",
+      "scenario": "deploy-and-dns-concurrent",
+      "verdict": true,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [
+        "fault 2 not named (any of: app-01, app-02, app-03, app-04)"
+      ],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-13",
+      "scenario": "hypervisor-02-contention [no tags]",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-15",
+      "scenario": "external-dependency-not-monitored",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-17",
+      "scenario": "access-switch-errors-below-threshold",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-18",
+      "scenario": "hypervisor-cpu-contention [no tags]",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-20",
+      "scenario": "resolved-link-flap-backlog",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-22",
+      "scenario": "cache-slow-burn",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-24",
+      "scenario": "hypervisor-02-contention",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    }
+  ]
+}
