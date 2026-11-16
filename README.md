@@ -3,9 +3,10 @@
 On-call investigator for Zabbix: turns an incident into a diagnosis with
 evidence, delivered to chat.
 
-> **Status: M1 spec, awaiting maintainer approval.** There is no product
-> yet. This repository holds a lab, an outage simulator, a golden dataset
-> and the specification. Progress: [`docs/STATUS.md`](docs/STATUS.md).
+> **Status: M2 ingest.** causewise receives Zabbix alerts and forms
+> incidents. It does not investigate or send anything to chat yet; that is
+> M3 and M4. Progress: [`docs/STATUS.md`](docs/STATUS.md). Install:
+> [`docs/install.md`](docs/install.md).
 
 ## Results so far
 
@@ -32,6 +33,9 @@ history, dependencies, timing) and reports the likely cause with the evidence.
 
 | Path | What it is |
 | --- | --- |
+| `src/`, `test/` | The service: webhook receiver, incident former, SQLite store |
+| `zabbix/` | Webhook script and importable media types for Zabbix 7.0 and 8.0 |
+| `e2e/` | End-to-end check against the lab |
 | `lab/` | Docker Compose lab with Zabbix 7.0 LTS and 8.0 LTS side by side |
 | `sim/` | Simulated 19-host estate, twenty outage scenarios with a known cause, and the golden dataset |
 | `tools/zq.mjs` | Read-only, point-in-time queries an investigator may use |
@@ -39,9 +43,21 @@ history, dependencies, timing) and reports the likely cause with the evidence.
 | `docs/` | Requirements, design, decision records, eval plan, results |
 | `AGENTS.md` | Working agreement for the AI agent that builds this |
 
+## Develop
+
+Needs Node.js 22.18 or newer.
+
+```bash
+npm ci
+```
+
+```bash
+npm run check
+```
+
 ## Run the lab
 
-Needs Docker and Node.js 22 or newer. No npm dependencies.
+Needs Docker. The simulator has no npm dependencies.
 
 ```bash
 docker compose -f lab/docker-compose.yml up -d
@@ -53,6 +69,10 @@ node sim/provision.mjs 7.0
 
 ```bash
 node sim/replay.mjs 7.0
+```
+
+```bash
+npm run e2e:lab
 ```
 
 ```bash

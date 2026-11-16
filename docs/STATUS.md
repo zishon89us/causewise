@@ -2,9 +2,11 @@
 
 Living progress log, updated at the end of every session.
 
-## Current milestone: M1 Spec
+## Current milestone: M2 Ingest
 
-Exit: the maintainer approves the spec (`docs/questions/m1.md`).
+Exit: a simulated outage arrives as one incident on 7.0 and 8.0. Met in the
+lab on 2026-11-16 (`npm run e2e:lab`), on 7.0, on 8.0, and on 8.0 with a
+native grouping rule enabled. Awaiting review.
 
 ## Done
 
@@ -18,23 +20,33 @@ Exit: the maintainer approves the spec (`docs/questions/m1.md`).
   scenarios, four no-tags variants) and piloted. Branch `docs/m1-spec`,
   stacked on `spike/m0-proof`.
 
+- 2026-11-16 — Maintainer approved the M1 spec. Pull requests opened for
+  M0 (#1) and M1 (#2).
+- 2026-11-16 — M2 ingest: webhook media type for 7.0 and 8.0, receiver,
+  incident former, SQLite store, container image, CI workflow, install
+  guide, ADRs 0007 and 0008. 31 unit tests; end-to-end check against the
+  lab. Branch `feat/m2-ingest`, stacked on `docs/m1-spec`.
+
 ## Next
 
-1. Maintainer answers `docs/questions/m1.md`.
-2. Merge `spike/m0-proof`, then `docs/m1-spec`.
-3. M2: monorepo tooling and CI, webhook media type, receiver, incident
-   store.
+1. Maintainer reviews and merges #1, #2, then the M2 branch.
+2. Maintainer answers the remaining questions in `docs/questions/m1.md`
+   (model provider and spend limit are needed before M3 can call a model).
+3. M3: read-only Zabbix client, investigation tools, automated scorer
+   (before any prompt work), agent loop, evals in CI.
 
 ## Blocked on the maintainer
 
-- Answers to `docs/questions/m1.md`.
+- Model provider, API key and spend limit (M3).
 - `main` is not protected.
-- No pull requests exist yet; the agent opens them only when asked.
 
 ## Not done yet
 
-- Issues for the user stories (the agent's session has no working GitHub
-  API access; the stories are in `docs/requirements/user-stories.md`).
+- The CI workflow has not run yet; it runs on the first pull request that
+  contains it.
+- The end-to-end lab check is manual, not in CI (it needs both Zabbix
+  stacks).
+- No TLS on the receiver; documented as a deployment requirement.
+- Issues for the user stories.
 - Automated scorer; scores so far are hand-assigned.
 - Large-estate scenarios and independent scenario review.
-- CI, tests, `Makefile`: arrive with product code in M2.
