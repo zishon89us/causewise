@@ -8,6 +8,7 @@
 //   node tools/zq.mjs --lab 7.0 --at <epoch> items <host>
 //   node tools/zq.mjs --lab 7.0 --at <epoch> history <host> <key> [minutes=30]
 //   node tools/zq.mjs --lab 7.0 --at <epoch> events [minutes=30]
+// Add --notags to hide host tags.
 import { ZabbixApi, LABS } from '../sim/zabbix.mjs';
 
 const args = process.argv.slice(2);
@@ -16,6 +17,8 @@ const opt = (name) => {
   return i >= 0 ? args.splice(i, 2)[1] : undefined;
 };
 const lab = opt('lab') ?? '7.0';
+// --notags hides host tags, to model an estate with no recorded topology.
+const noTags = args.includes('--notags') && args.splice(args.indexOf('--notags'), 1).length > 0;
 const at = Number(opt('at'));
 const [cmd, ...rest] = args;
 if (!LABS[lab] || !at || !cmd) {
@@ -57,7 +60,8 @@ if (cmd === 'problems') {
   }
 } else if (cmd === 'hosts') {
   const hs = await api.call('host.get', { output: ['host'], selectTags: ['tag', 'value'], sortfield: 'host' });
-  for (const h of hs) console.log(`${h.host.padEnd(12)} ${h.tags.map((t) => `${t.tag}=${t.value}`).join(' ')}`);
+  for (const h of hs) console.log(`${h.host.padEnd(12)} ${noTags ? '' : h.tags.map((t) => `${t.tag}=${t.value}`).join(' ')}`.trimEnd());
+  if (noTags) console.log('(no host tags are recorded on this estate)');
 } else if (cmd === 'items') {
   const items = await api.call('item.get', { host: rest[0], output: ['itemid', 'key_'], sortfield: 'key_' });
   if (!items.length) console.log(`no such host or no items: ${rest[0]}`);

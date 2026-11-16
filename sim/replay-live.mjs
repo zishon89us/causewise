@@ -25,7 +25,7 @@ const nowS = () => Math.floor(Date.now() / 1000);
 const api = await new ZabbixApi(LABS[lab].api).login();
 const results = [];
 
-for (const n of scenarios.keys()) {
+for (const n of scenarios.slice(0, 10).keys()) { // the M0 set
   const values = generate(n, undefined, FROM, T.pageAt);
   const wallStart = Date.now();
   for (let i = 0; i < values.length; ) {
