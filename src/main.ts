@@ -3,6 +3,10 @@ import { ConfigError, loadConfig, type Config } from './config.ts';
 import { Store } from './store.ts';
 import { IncidentFormer } from './incidents.ts';
 import { createReceiver } from './server.ts';
+import { ZabbixClient } from './zabbix/client.ts';
+import { ClaudeClient } from './llm-claude.ts';
+import { loadPrompt } from './prompt.ts';
+import { investigateIncident, type InvestigatorDeps } from './run-investigation.ts';
 
 const log = (entry: Record<string, unknown>): void => {
   console.log(JSON.stringify({ time: new Date().toISOString(), ...entry }));
@@ -21,12 +25,31 @@ try {
 }
 
 const store = new Store(config.dbPath);
+
+let investigator: InvestigatorDeps | null = null;
+if (config.investigator) {
+  const c = config.investigator;
+  investigator = {
+    store,
+    zabbix: new ZabbixClient({ url: c.zabbixUrl, token: c.zabbixToken }),
+    llm: new ClaudeClient({ model: c.model, effort: c.effort }),
+    prompt: loadPrompt('investigator'),
+    config: c,
+    now,
+    log,
+  };
+}
+// Investigations run one at a time, in the order incidents became ready.
+let queue: Promise<unknown> = Promise.resolve();
+
 const former = new IncidentFormer(store, {
   settleSeconds: config.settleSeconds,
   quietSeconds: config.quietSeconds,
-  // The investigator (M3) hooks in here.
-  onReady: (incident) =>
-    log({ event: 'incident_ready', incident: incident.id, alerts: store.alerts(incident.id).length }),
+  onReady: (incident) => {
+    log({ event: 'incident_ready', incident: incident.id, alerts: store.alerts(incident.id).length });
+    const deps = investigator;
+    if (deps) queue = queue.then(() => investigateIncident(deps, incident.id));
+  },
   onClosed: (incident) => log({ event: 'incident_closed', incident: incident.id }),
 });
 
@@ -40,7 +63,10 @@ const timer = setInterval(() => {
 }, 1000);
 
 server.listen(config.port, config.host, () => {
-  log({ event: 'listening', host: config.host, port: config.port, settle_seconds: config.settleSeconds });
+  log({
+    event: 'listening', host: config.host, port: config.port, settle_seconds: config.settleSeconds,
+    investigator: config.investigator ? { model: config.investigator.model, prompt: investigator?.prompt.version } : 'not configured',
+  });
 });
 
 const shutdown = (): void => {
