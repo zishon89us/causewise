@@ -5,7 +5,7 @@ evidence, delivered to chat.
 
 > **Status: M0 proof spike.** There is no product yet. This repository
 > currently holds a lab, an outage simulator and the results of a first
-> feasibility test. Results so far are in `evals/m0/`; a written summary will follow in `docs/`.
+> feasibility test. See [`docs/m0-results.md`](docs/m0-results.md).
 
 ## Why
 
