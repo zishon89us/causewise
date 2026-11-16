@@ -1,0 +1,32 @@
+{
+  "incident": "INC-05",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "hv-01",
+      "what": "The hypervisor hv-01 saturated its CPU at about 05:34 (util 45% to 96%, CPU ready 1.6% to 35%). The VMs on it (app-01, app-02, cache-01) are starved. That caused the slow app and cache responses, the job queue backlog and, downstream, slow HTTP on all four web servers. The monitoring data does not show which workload drove the CPU spike.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [
+    "web-01: Disk space is low on / (started 04:47, long before the incident)",
+    "db-02: High CPU utilization (replica, started about 05:04, a step to about 94% well before the 05:34 incident; db-02 is not tagged to hv-01, replica lag only 3.4s, and the primary db-01 is healthy)",
+    "app-04: High memory utilization (started 05:15, not on hv-01, not tied to the 05:34 onset)"
+  ],
+  "ruled_out": [
+    "db-01 primary and nas-01 storage (cpu 32%, io wait 5.7%, nas latency 5.3ms, slow queries 2.3/s, app.db.errors 0)",
+    "network or switch fault (icmp loss 0 everywhere, lb backends healthy 4/4, lb 5xx 0.25%)",
+    "app-03 is on the same switch but not on hv-01 and is only mildly slow (737ms, queue 38)",
+    "guest CPU on app-01, app-02 and cache-01 is normal (about 24%), so the load is not inside the VMs",
+    "db-02 CPU as the cause (onset 05:04 is 30 minutes earlier and it is not in the request path)"
+  ],
+  "evidence": [
+    "hv-01 hv.cpu.util.pct stepped from about 43% at 05:33 to 95.5% at 05:34 and stayed at 96-98% through 05:39",
+    "hv-01 hv.cpu.ready.pct jumped from 1.6% at 05:33 to 30.8% at 05:34 and stayed at 31-39%",
+    "Problems open 05:34:54 to 05:35:43: app-02, cache-01 and app-01 (all hypervisor=hv-01) slow, then the web servers slow at 05:35:14-05:35:32, then job queue alerts at 05:37-05:38",
+    "app-01 app.resp.ms is 2383ms and app.queue.depth is 650, while app-03 (not on hv-01) is 737ms with queue 38",
+    "cache-01 resp 90ms while its own cpu is 24% (a hypervisor-level slowdown)"
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 16
+}

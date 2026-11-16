@@ -1,0 +1,29 @@
+{
+  "incident": "INC-01",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "cache-01",
+      "what": "The cache tier stopped reporting (cache service or agent failed) at about 13:33. Reads then fell through to db-01, which overloaded and slowed the app and web tiers.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "nas-01/storage (latency 2.8ms, db-01 io wait normal at 4%)",
+    "network: icmp loss 0 on all hosts checked; web, app and db alerts do not share a single switch",
+    "hypervisor hv-01 (cpu ready 1.7%, cpu 50%)",
+    "app deploy (app.version stable at 412)",
+    "db-02 replica (conn 68, slow queries 2.9, normal)",
+    "lb-01 (4 of 4 backends healthy, 5xx 0.06%)"
+  ],
+  "evidence": [
+    "cache-01 cache.hit.pct and cache.resp.ms have no samples after 13:33:02 (age -7m). Every other metric on cache-01, including ICMP, is still fresh at -1m, so the host is up and only the cache metrics stopped. The last hit rate was normal at 91%.",
+    "db-01 changed in a step at about 13:33-13:35. Connections went from ~60 to ~185, slow queries from ~2 to ~15 per second, and cpu from ~22% to ~80%. io wait stayed at ~4%, so this is query load rather than disk.",
+    "app-01 app.resp.ms rose from ~350ms to ~1710ms at 13:35. web-01 http.resp.ms is ~2474ms. All 9 alerts (web-01..04, app-01..04, db-01) opened between 13:35:05 and 13:35:41, about 2 minutes after the cache stopped reporting.",
+    "The problem set is one shop service across all web, app and db hosts, while db-02 and lb-01 look normal. This fits a shared dependency failing upstream of the db, not a network or storage fault.",
+    "No alert exists for cache-01, so this cause is inferred from the stale metrics. A cache failure is the most likely explanation, but I cannot confirm that the service itself crashed."
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 16
+}

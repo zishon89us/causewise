@@ -1,0 +1,26 @@
+{
+  "incident": "INC-10",
+  "verdict": "benign",
+  "causes": [],
+  "unrelated_alerts": [
+    "web-02: High CPU utilization (isolated CPU step on one web node, no service impact)"
+  ],
+  "ruled_out": [
+    "web tier latency/5xx impact (web-02 resp time and 5xx unchanged)",
+    "app tier (app-01/03 normal, db errors 0)",
+    "db-01/db-02 (cpu ~25%, io wait low, repl lag 1.6-3.6s)",
+    "cache-01 (hit 89%, 5.5ms)",
+    "nas-01 (latency 5.4ms)",
+    "hv-01 (cpu ready 2.2%)",
+    "lb-01 (4/4 backends healthy, 5xx 0.06%)",
+    "network/switch (no ping loss on any host checked)"
+  ],
+  "evidence": [
+    "Only open problem: web-02 High CPU, started 01:35:52, 4 min before now; no other trigger events in the last 120 min",
+    "web-02 cpu.util.pct was about 20-32% for the hour, then stepped to 94-95% at about 01:34 and stayed there",
+    "web-02 http.resp.ms 419-489 and 5xx 0.02-0.37% before and after the step, in line with web-01 (372), web-03 (490), web-04 (479)",
+    "lb-01 shows 4 healthy backends and 5xx 0.06%; app and db metrics are all normal"
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 10
+}

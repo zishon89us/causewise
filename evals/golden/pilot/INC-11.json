@@ -1,0 +1,34 @@
+{
+  "incident": "INC-11",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "dns-01",
+      "what": "DNS server is saturated (CPU about 95-98%, query time about 1.7-2.0 s against a baseline of about 20 ms). The app tier's 'database errors' are probably failed name lookups, and they cascade into slow app responses, web and LB 5xx.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [
+    "app-01: Application version has changed (info, 412 to 413 rollout, no causal link)",
+    "app-02: Application version has changed (info)",
+    "app-04: Application version has changed (info)"
+  ],
+  "ruled_out": [
+    "db-01 and db-02 are healthy (cpu 23%, io wait 8%, connections about 64 and flat, replication lag 2.6 s, slow queries about 1.3/s)",
+    "nas-01 storage is normal (latency 4 ms)",
+    "cache-01 and hv-01 are normal",
+    "app deploy as the cause: app-03 shows db errors from 05:35 while still on version 412",
+    "network, ICMP or hypervisor fault: no packet loss and no host down",
+    "app, web and lb CPU are about 20-30%, so those tiers are victims"
+  ],
+  "evidence": [
+    "dns-01 cpu.util.pct was 20-32% until 05:33:30, then 94% at 05:34:30 and 98% at 05:39:30",
+    "dns-01 dns.query.ms was 24 ms at 05:32:50, then 1980 ms at 05:35:50 and 1694 ms at 05:38:50",
+    "app db.errors.rate was 0 until 05:32, then about 8/s on app-01 from 05:33, app-02 and app-03 from about 05:35, app-04 from 05:38; the staggered onset is consistent with DNS cache expiry",
+    "lb-01 5xx is 48% with 4 backends still healthy, and web 5xx alerts start 05:33:46",
+    "db-01 metrics show no change over the incident window",
+    "caveat: app-01 db errors began at the 05:33:27 sample, about 1 minute before the first elevated dns-01 CPU sample at 05:34:30, so the ordering is close; the root cause of the dns-01 CPU saturation (for example a query flood) is not visible in the data"
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 22
+}

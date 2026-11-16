@@ -1,0 +1,27 @@
+{
+  "incident": "INC-03",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "dist-sw-02 (core-rtr-01 link to dist-sw-02)",
+      "what": "The distribution switch dist-sw-02 (or its uplink from core-rtr-01) went down. Everything behind it (app-01..04, db-01/02, cache-01, hv-01) is unreachable. The web tier then returns 5xx because it has lost its app and db backends.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "Individual failures of app, db, cache and hv hosts: they all went unreachable within about 2 minutes, which points to a shared upstream",
+    "Web servers as the origin: they still answer ping and their 5xx alerts came after the link-down",
+    "Interface errors on the core-rtr-01 or dist-sw-02 link: error rates were low and noisy (0.0-0.97) before and after the drop"
+  ],
+  "evidence": [
+    "21:34:26 core-rtr-01 if.status[dist-sw-02] went from 1 to 0 and the 'Link down: to dist-sw-02' alert fired. It was the first event in the 120-minute window.",
+    "21:34:51-21:35:41 ICMP loss warnings on db-01, db-02, dist-sw-02, app-01..04, cache-01 and hv-01. 'Unavailable by ICMP' followed at 21:35:59-21:36:42 on the same hosts.",
+    "dist-sw-02 shows icmp.loss.pct 100 and ping 0. Its uplink status and error metrics last reported about 6 minutes ago, around 21:33.",
+    "21:35:10-21:35:32 HTTP 5xx alerts on web-01..04 and lb-01, 40-60 seconds after the link-down and while those hosts still respond to ping.",
+    "core-rtr-01 itself is healthy (ping 1, loss 0) and its dist-sw-01 link is up (if.status 1).",
+    "I did not check whether dist-sw-02 itself failed or only its link did, so the exact fault at dist-sw-02 is not confirmed."
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 8
+}

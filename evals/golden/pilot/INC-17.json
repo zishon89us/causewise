@@ -1,0 +1,31 @@
+{
+  "incident": "INC-17",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "dist-sw-01",
+      "what": "Interface errors surged on dist-sw-01, the upstream switch for web-01..04 (and hv-02). This causes packet loss to the whole web tier, slow HTTP responses, and 5xx at the load balancer.",
+      "confidence": "high"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "web hosts' own CPU/mem (cpu 28-33%, normal)",
+    "app/db tier (app-01 db errors 0, db-01 cpu 21%, io wait 6%, normal)",
+    "core-rtr-01 (0% loss, if errors 0.41)",
+    "lb-01 itself (cpu 19%, all 4 backends still healthy; its 5xx is a symptom)",
+    "hv-02 hypervisor load (cpu ready 1.4%)",
+    "dist-sw-02 / shop app path"
+  ],
+  "evidence": [
+    "dist-sw-01 if.errors.rate jumped from ~0.1-0.9 to ~33 at 05:34:26 and stays at 27-35 through 05:39",
+    "web-01..04 icmp loss went from 0% to 8-14% at about 05:35, and hv-02 (also behind dist-sw-01) shows 9.6% loss",
+    "web-01..04 http.resp.ms is 2.5-2.8 s",
+    "lb-01 5xx is 6.55%",
+    "the four web-tier alerts and the lb-01 alert all fired 05:35:24-05:35:45, just after the errors began",
+    "every host behind dist-sw-01 is affected, and the hosts behind dist-sw-02 and core-rtr-01 are clean",
+    "dist-sw-01 uplink status is still up (1), so this looks like a degraded link or port (errors) and not a down link"
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 7
+}
