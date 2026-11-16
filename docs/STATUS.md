@@ -2,11 +2,13 @@
 
 Living progress log, updated at the end of every session.
 
-## Current milestone: M2 Ingest
+## Current milestone: M3 Investigator
 
-Exit: a simulated outage arrives as one incident on 7.0 and 8.0. Met in the
-lab on 2026-11-16 (`npm run e2e:lab`), on 7.0, on 8.0, and on 8.0 with a
-native grouping rule enabled. Awaiting review.
+Exit: the thresholds in `docs/ai/eval-plan.md` are met.
+
+First half (no model needed) is done and awaiting review. The second half
+(agent loop, prompts, eval runs) is blocked on a model provider, API key
+and spend limit.
 
 ## Done
 
@@ -27,26 +29,44 @@ native grouping rule enabled. Awaiting review.
   guide, ADRs 0007 and 0008. 31 unit tests; end-to-end check against the
   lab. Branch `feat/m2-ingest`, stacked on `docs/m1-spec`.
 
+- 2026-11-16 — Maintainer merged M0, M1 and M2 into `main`; CI passed.
+- 2026-11-16 — M3, first half: read-only Zabbix client with a method
+  allow-list, seven investigation tools, the dedicated read-only Zabbix
+  role, and the deterministic scorer. `tools/zq.mjs` now runs the product
+  tools. 67 unit tests; `npm run e2e:tools` passes on 7.0 and 8.0. Recorded
+  pilot answers re-scored automatically. Branch `feat/m3-zabbix-tools`.
+
+## Assumptions made without asking (maintainer said not to ask)
+
+- Opened a pull request for this branch, as for the earlier milestones.
+- Supported versions stay 7.0 and 8.0; 6.0 is not claimed.
+- The audit-log tool is dropped, because it needs a super admin.
+- Cause accuracy now counts a correct answer at low confidence (see the
+  eval plan). This makes the alerts-only baseline score higher, not lower.
+- Replay manifests (`incidents.<lab>.local.json`) are no longer committed,
+  because their timestamps change on every replay.
+
 ## Next
 
-1. Maintainer reviews and merges #1, #2, then the M2 branch.
-2. Maintainer answers the remaining questions in `docs/questions/m1.md`
-   (model provider and spend limit are needed before M3 can call a model).
-3. M3: read-only Zabbix client, investigation tools, automated scorer
-   (before any prompt work), agent loop, evals in CI.
+1. Maintainer chooses the model provider and default model and supplies an
+   API key and spend limit (question 2 in `docs/questions/m1.md`).
+2. M3, second half: provider adapter, agent loop with the tool specs in
+   `src/tools.ts`, versioned prompt, query log persisted to the store,
+   evidence-validity and mechanism graders, three eval runs per incident,
+   eval subset in CI.
 
 ## Blocked on the maintainer
 
-- Model provider, API key and spend limit (M3).
+- Model provider, API key and spend limit.
 - `main` is not protected.
 
 ## Not done yet
 
-- The CI workflow has not run yet; it runs on the first pull request that
-  contains it.
-- The end-to-end lab check is manual, not in CI (it needs both Zabbix
-  stacks).
+- Nothing in the running service uses the client or tools yet; they are
+  wired in with the agent loop.
+- The maintenance tool has only been exercised against an empty lab and a
+  unit-test fake.
+- Lab end-to-end checks are manual, not in CI.
 - No TLS on the receiver; documented as a deployment requirement.
 - Issues for the user stories.
-- Automated scorer; scores so far are hand-assigned.
 - Large-estate scenarios and independent scenario review.

@@ -1,0 +1,114 @@
+{
+  "dataset": "m0",
+  "source": "evals/m0/answers",
+  "scorer": "src/eval/score.ts",
+  "totals": {
+    "incidents": 10,
+    "cause_accuracy": "10/10",
+    "false_blame_incidents": 0,
+    "unrelated_separation": "2/2",
+    "disagreements_with_hand_score": []
+  },
+  "rows": [
+    {
+      "id": "INC-01",
+      "scenario": "switch-uplink-down",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-02",
+      "scenario": "db-volume-full",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-03",
+      "scenario": "hypervisor-cpu-contention",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-04",
+      "scenario": "dns-resolver-slow",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-05",
+      "scenario": "storage-latency",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-06",
+      "scenario": "app-memory-leak",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "pass",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-07",
+      "scenario": "bad-deploy",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-08",
+      "scenario": "core-router-packet-loss",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-09",
+      "scenario": "two-independent-faults",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-10",
+      "scenario": "load-balancer-health-checks",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "pass",
+      "notes": [],
+      "hand": "correct"
+    }
+  ]
+}

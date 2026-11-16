@@ -2,6 +2,7 @@
 // order, and with which twist. `hideTags` means the investigator is not shown
 // host tags, as on an estate where nobody recorded topology.
 import { scenarios } from './scenarios.mjs';
+import { hosts } from './topology.mjs';
 
 const M0 = scenarios.slice(0, 10).map((s) => ({ scenario: s.name }));
 
@@ -26,3 +27,21 @@ export function resolve(name) {
     return { id: `INC-${String(n + 1).padStart(2, '0')}`, index, hideTags: Boolean(entry.hideTags), ...scenarios[index] };
   });
 }
+
+/** Scenario truth in the shape the scorer takes. */
+export function truthOf(scenario) {
+  const t = scenario.truth;
+  const kind = t.kind ?? 'fault';
+  return {
+    kind,
+    causes: kind === 'fault' ? (t.causes ?? [t.hosts]) : [],
+    alsoOk: t.alsoOk ?? [],
+    unrelated: t.unrelated ?? [],
+  };
+}
+
+/** What the scorer needs to recognise host names and tier names in free text. */
+export const estate = {
+  hosts: hosts.map((h) => h.name),
+  tiers: Object.fromEntries([...new Set(hosts.map((h) => h.role))].map((role) => [role, hosts.filter((h) => h.role === role).map((h) => h.name)])),
+};

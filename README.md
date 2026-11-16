@@ -3,22 +3,23 @@
 On-call investigator for Zabbix: turns an incident into a diagnosis with
 evidence, delivered to chat.
 
-> **Status: M2 ingest.** causewise receives Zabbix alerts and forms
-> incidents. It does not investigate or send anything to chat yet; that is
-> M3 and M4. Progress: [`docs/STATUS.md`](docs/STATUS.md). Install:
+> **Status: M3 in progress.** causewise receives Zabbix alerts and forms
+> incidents, and its read-only investigation tools and automatic scorer
+> exist. The agent that uses them, and delivery to chat, are not built yet. Progress: [`docs/STATUS.md`](docs/STATUS.md). Install:
 > [`docs/install.md`](docs/install.md).
 
 ## Results so far
 
-Simulated outages with a known cause, one run each, scored by hand by the
-agent that wrote the scenarios (details and limits in
+Simulated outages with a known cause, one run each. Model answers are scored automatically
+by `src/eval/score.ts`; the scenarios were written by the same AI agent family
+(details and limits in
 [`docs/m0-results.md`](docs/m0-results.md) and
 [`docs/ai/eval-plan.md`](docs/ai/eval-plan.md)):
 
 | Approach | M0 set (10) | Harder incidents (14) |
 | --- | --- | --- |
 | Zabbix 8.0 first-event-in-window rule | 5 of 10 | not run |
-| Model reading only the alert list | 8 of 10 | 4 of 14 |
+| Model reading only the alert list | 9 of 10 | 4 of 14 |
 | Model investigating with read-only queries | 10 of 10 | 13 of 14 |
 
 ## Why
@@ -33,7 +34,7 @@ history, dependencies, timing) and reports the likely cause with the evidence.
 
 | Path | What it is |
 | --- | --- |
-| `src/`, `test/` | The service: webhook receiver, incident former, SQLite store |
+| `src/`, `test/` | The service: webhook receiver, incident former, SQLite store, read-only Zabbix client, investigation tools, scorer |
 | `zabbix/` | Webhook script and importable media types for Zabbix 7.0 and 8.0 |
 | `e2e/` | End-to-end check against the lab |
 | `lab/` | Docker Compose lab with Zabbix 7.0 LTS and 8.0 LTS side by side |
@@ -73,6 +74,10 @@ node sim/replay.mjs 7.0
 
 ```bash
 npm run e2e:lab
+```
+
+```bash
+npm run e2e:tools
 ```
 
 ```bash

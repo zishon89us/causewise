@@ -1,6 +1,6 @@
 // Replay a dataset into a lab Zabbix as back-dated history, one incident
 // every four hours, ending a few hours before now. Writes the incident list
-// (ids and page times only, no answers) to evals/<set>/incidents.json.
+// (ids and page times only, no answers) to evals/<set>/incidents.<lab>.local.json.
 import fs from 'node:fs';
 import { LABS, send } from './zabbix.mjs';
 import { generate, DEFAULT_SEED } from './generate.mjs';
@@ -33,7 +33,9 @@ for (const [n, sc] of scenarios.entries()) {
   console.log(`replayed scenario ${n + 1}/${scenarios.length} (${values.length} values)`);
 }
 
-const out = set === 'm0' ? `evals/m0/incidents.${lab}.json` : `evals/${set}/incidents.json`;
+// Page times depend on when the replay ran, so the manifest is a local,
+// untracked file. The committed incidents.json files record earlier pilots.
+const out = `evals/${set}/incidents.${lab}.local.json`;
 fs.mkdirSync(`evals/${set}`, { recursive: true });
 fs.writeFileSync(out, JSON.stringify({ lab, set, seed, incidents }, null, 2) + '\n');
 console.log(`done: ${total} values`);

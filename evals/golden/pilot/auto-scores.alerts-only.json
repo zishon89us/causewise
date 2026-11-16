@@ -1,0 +1,287 @@
+{
+  "dataset": "golden",
+  "source": "evals/golden/pilot/alerts-only.json",
+  "scorer": "src/eval/score.ts",
+  "totals": {
+    "incidents": 24,
+    "cause_accuracy": "13/24",
+    "false_blame_incidents": 0,
+    "unrelated_separation": "3/3",
+    "disagreements_with_hand_score": [
+      "INC-19"
+    ]
+  },
+  "rows": [
+    {
+      "id": "INC-01",
+      "scenario": "cache-hung-stale-metrics",
+      "verdict": true,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [
+        "fault 1 not named (any of: cache-01)",
+        "extra cause at medium confidence: \"db-01\""
+      ],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-02",
+      "scenario": "dns-resolver-slow",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-03",
+      "scenario": "switch-uplink-down [no tags]",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-04",
+      "scenario": "core-router-packet-loss",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-05",
+      "scenario": "noisy-estate-hidden-cause",
+      "verdict": true,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "pass",
+      "notes": [
+        "fault 1 not named (any of: hv-01)",
+        "extra cause at medium confidence: \"cache-01\""
+      ],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-06",
+      "scenario": "switch-uplink-down",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-07",
+      "scenario": "storage-latency [no tags]",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-08",
+      "scenario": "storage-degraded-below-threshold",
+      "verdict": true,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [
+        "fault 1 not named (any of: nas-01)",
+        "extra cause at medium confidence: \"db-01\""
+      ],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-09",
+      "scenario": "app-memory-leak",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "pass",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-10",
+      "scenario": "benign-cpu-spike",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-11",
+      "scenario": "deploy-and-dns-concurrent",
+      "verdict": true,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [
+        "fault 1 not named (any of: dns-01)"
+      ],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-12",
+      "scenario": "db-volume-full",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-13",
+      "scenario": "hypervisor-02-contention [no tags]",
+      "verdict": false,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [
+        "verdict \"undetermined\", expected \"cause_found\"",
+        "fault 1 not named (any of: hv-02)"
+      ],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-14",
+      "scenario": "load-balancer-health-checks",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "pass",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-15",
+      "scenario": "external-dependency-not-monitored",
+      "verdict": false,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [
+        "verdict \"cause_found\", expected \"undetermined\""
+      ],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-16",
+      "scenario": "storage-latency",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-17",
+      "scenario": "access-switch-errors-below-threshold",
+      "verdict": false,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [
+        "verdict \"undetermined\", expected \"cause_found\"",
+        "fault 1 not named (any of: dist-sw-01)"
+      ],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-18",
+      "scenario": "hypervisor-cpu-contention [no tags]",
+      "verdict": true,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [
+        "fault 1 not named (any of: hv-01)",
+        "extra cause at medium confidence: \"cache-01\""
+      ],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-19",
+      "scenario": "two-independent-faults",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-20",
+      "scenario": "resolved-link-flap-backlog",
+      "verdict": false,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [
+        "verdict \"undetermined\", expected \"cause_found\"",
+        "fault 1 not named (any of: core-rtr-01, dist-sw-01)"
+      ],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-21",
+      "scenario": "hypervisor-cpu-contention",
+      "verdict": true,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [
+        "fault 1 not named (any of: hv-01)",
+        "extra cause at medium confidence: \"cache-01\""
+      ],
+      "hand": "wrong"
+    },
+    {
+      "id": "INC-22",
+      "scenario": "cache-slow-burn",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-23",
+      "scenario": "bad-deploy",
+      "verdict": true,
+      "causeAccuracy": true,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [],
+      "hand": "correct"
+    },
+    {
+      "id": "INC-24",
+      "scenario": "hypervisor-02-contention",
+      "verdict": false,
+      "causeAccuracy": false,
+      "falseBlame": [],
+      "unrelated": "n/a",
+      "notes": [
+        "verdict \"undetermined\", expected \"cause_found\"",
+        "fault 1 not named (any of: hv-02)"
+      ],
+      "hand": "wrong"
+    }
+  ]
+}

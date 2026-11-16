@@ -56,6 +56,28 @@ written for the lab and uses the default Admin account.
 Use the media type's "Test" button, or wait for a real alert, then look at
 the container log for a line with `"event":"alert"`.
 
+## 5. Prepare read-only access (used from the next milestone)
+
+The investigator will read from the Zabbix API. Give it its own user that
+can do nothing else:
+
+1. Users → User roles → create a role of type "User". Under API access,
+   enable it, choose "Allow list" and enter exactly: `event.get`,
+   `history.get`, `host.get`, `item.get`, `maintenance.get`, `trigger.get`.
+   Untick everything under UI and Actions.
+2. Users → User groups → create a group with **read** permission on the
+   host groups you want investigated.
+3. Users → create a user in that group with that role.
+4. Users → API tokens → create a token for that user.
+
+Do not reuse an existing "read-only" user. Tested on 7.0: a user with the
+built-in "User role" and read-only host permissions can still push values
+into metrics through the API. On 8.0 the built-in role cannot use the API
+at all.
+
+`tools/lab-readonly-token.mjs` does these steps in the lab, and
+`npm run e2e:tools` checks that the token can read and cannot write.
+
 ## Notes for Zabbix 8.0
 
 - **Grouping rules delay symptom alerts.** With an event-processing rule

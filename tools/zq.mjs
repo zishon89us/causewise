@@ -1,83 +1,65 @@
 #!/usr/bin/env node
-// Read-only investigation queries against Zabbix, "as of" a moment in time.
-// Nothing after --at is ever returned, so a past incident can be investigated
-// as if it were happening now.
+// Command-line front end to the investigator's tools (src/tools.ts), for
+// people and for blind evaluation runs. Read-only. With --at, nothing after
+// that moment is returned, so a replayed incident can be investigated as if
+// it were happening now.
 //
-//   node tools/zq.mjs --lab 7.0 --at <epoch> problems
-//   node tools/zq.mjs --lab 7.0 --at <epoch> hosts
-//   node tools/zq.mjs --lab 7.0 --at <epoch> items <host>
-//   node tools/zq.mjs --lab 7.0 --at <epoch> history <host> <key> [minutes=30]
-//   node tools/zq.mjs --lab 7.0 --at <epoch> events [minutes=30]
-// Add --notags to hide host tags.
+//   node tools/zq.mjs [--lab 7.0|8.0] [--at <epoch>] [--notags] <tool> [args]
+//
+//   problems | events [minutes] | hosts | items <host>
+//   history <host> <key> [minutes] | triggers <host> | maintenance
+//
+// Authentication: CAUSEWISE_ZABBIX_URL and CAUSEWISE_ZABBIX_TOKEN if set
+// (use a token for a read-only role). Otherwise it logs in to the chosen lab
+// with the lab's default Admin account.
 import { ZabbixApi, LABS } from '../sim/zabbix.mjs';
+import { ZabbixClient } from '../src/zabbix/client.ts';
+import { Investigation, TOOL_SPECS } from '../src/tools.ts';
 
 const args = process.argv.slice(2);
 const opt = (name) => {
   const i = args.indexOf(`--${name}`);
   return i >= 0 ? args.splice(i, 2)[1] : undefined;
 };
+const flag = (name) => {
+  const i = args.indexOf(`--${name}`);
+  return i >= 0 && args.splice(i, 1).length > 0;
+};
 const lab = opt('lab') ?? '7.0';
-// --notags hides host tags, to model an estate with no recorded topology.
-const noTags = args.includes('--notags') && args.splice(args.indexOf('--notags'), 1).length > 0;
-const at = Number(opt('at'));
-const [cmd, ...rest] = args;
-if (!LABS[lab] || !at || !cmd) {
-  console.error('usage: zq.mjs --lab <7.0|8.0> --at <epoch> <problems|hosts|items|history|events> ...');
+const at = opt('at');
+const hideTags = flag('notags');
+const [tool, ...rest] = args;
+
+if (!tool || !TOOL_SPECS.some((t) => t.name === tool) || (at !== undefined && !Number(at))) {
+  console.error('usage: zq.mjs [--lab 7.0|8.0] [--at <epoch>] [--notags] <tool> [args]');
+  console.error(`tools: ${TOOL_SPECS.map((t) => t.name).join(', ')}`);
   process.exit(2);
 }
-const MAX_LOOKBACK = 120 * 60;
-const SEV = ['not classified', 'info', 'warning', 'average', 'high', 'disaster'];
-const iso = (s) => new Date(s * 1000).toISOString().slice(11, 19);
-const rel = (s) => `${s - at >= 0 ? '+' : ''}${Math.round((s - at) / 60)}m`;
 
-const api = await new ZabbixApi(LABS[lab].api).login();
-
-async function triggerEvents(from) {
-  const evs = await api.call('event.get', {
-    source: 0, object: 0, time_from: from, time_till: at,
-    output: ['eventid', 'clock', 'name', 'severity', 'value', 'r_eventid', 'cause_eventid'],
-    selectHosts: ['host'], sortfield: ['clock', 'eventid'],
-  });
-  // Events whose host has since been deleted carry no host; skip them.
-  return evs.filter((e) => e.hosts.length).map((e) => ({ ...e, clock: Number(e.clock), host: e.hosts[0].host }));
+let url = process.env.CAUSEWISE_ZABBIX_URL;
+let token = process.env.CAUSEWISE_ZABBIX_TOKEN;
+if (!url || !token) {
+  if (!LABS[lab]) throw new Error(`unknown lab: ${lab}`);
+  url = LABS[lab].api;
+  token = (await new ZabbixApi(url).login()).auth;
 }
 
-if (cmd === 'problems') {
-  // Problems that started before --at and had not recovered by --at.
-  const evs = await triggerEvents(at - MAX_LOOKBACK);
-  const recoveredAt = new Map(evs.filter((e) => e.value === '0').map((e) => [e.eventid, e.clock]));
-  const open = evs.filter((e) => e.value === '1' && !(recoveredAt.get(e.r_eventid) <= at));
-  console.log(`Open problems as of ${iso(at)} UTC (${open.length}):`);
-  for (const e of open) {
-    console.log(`${iso(e.clock)} (${rel(e.clock)})  ${SEV[e.severity].padEnd(8)} ${e.host.padEnd(12)} ${e.name}`);
-  }
-} else if (cmd === 'events') {
-  const minutes = Math.min(Number(rest[0] ?? 30), MAX_LOOKBACK / 60);
-  const evs = await triggerEvents(at - minutes * 60);
-  console.log(`Trigger events in the ${minutes} minutes before ${iso(at)} UTC:`);
-  for (const e of evs) {
-    console.log(`${iso(e.clock)} (${rel(e.clock)})  ${e.value === '1' ? 'PROBLEM ' : 'RESOLVED'} ${SEV[e.severity].padEnd(8)} ${e.host.padEnd(12)} ${e.name}`);
-  }
-} else if (cmd === 'hosts') {
-  const hs = await api.call('host.get', { output: ['host'], selectTags: ['tag', 'value'], sortfield: 'host' });
-  for (const h of hs) console.log(`${h.host.padEnd(12)} ${noTags ? '' : h.tags.map((t) => `${t.tag}=${t.value}`).join(' ')}`.trimEnd());
-  if (noTags) console.log('(no host tags are recorded on this estate)');
-} else if (cmd === 'items') {
-  const items = await api.call('item.get', { host: rest[0], output: ['itemid', 'key_'], sortfield: 'key_' });
-  if (!items.length) console.log(`no such host or no items: ${rest[0]}`);
-  for (const it of items) {
-    const [last] = await api.call('history.get', { itemids: [it.itemid], history: 0, time_till: at, sortfield: 'clock', sortorder: 'DESC', limit: 1 });
-    console.log(`${it.key_.padEnd(26)} ${last ? `${last.value}  (${rel(Number(last.clock))})` : 'no data'}`);
-  }
-} else if (cmd === 'history') {
-  const [host, key] = rest;
-  const minutes = Math.min(Number(rest[2] ?? 30), MAX_LOOKBACK / 60);
-  const [it] = await api.call('item.get', { host, filter: { key_: key }, output: ['itemid'] });
-  if (!it) { console.log(`no such item: ${host} ${key}`); process.exit(0); }
-  const hist = await api.call('history.get', { itemids: [it.itemid], history: 0, time_from: at - minutes * 60, time_till: at, sortfield: 'clock' });
-  console.log(`${host} ${key}, last ${minutes} minutes before ${iso(at)} UTC (${hist.length} samples):`);
-  for (const p of hist) console.log(`${iso(Number(p.clock))} (${rel(Number(p.clock))})  ${p.value}`);
-} else {
-  console.error(`unknown command: ${cmd}`);
-  process.exit(2);
+const num = (v) => (v === undefined ? undefined : Number(v));
+const toolArgs = {
+  events: () => ({ minutes: num(rest[0]) }),
+  items: () => ({ host: rest[0] }),
+  triggers: () => ({ host: rest[0] }),
+  history: () => ({ host: rest[0], key: rest[1], minutes: num(rest[2]) }),
+}[tool]?.() ?? {};
+for (const k of Object.keys(toolArgs)) if (toolArgs[k] === undefined) delete toolArgs[k];
+
+const investigation = new Investigation(new ZabbixClient({ url, token, minIntervalMs: 50 }), {
+  asOf: at === undefined ? undefined : Number(at),
+  hideTags,
+});
+try {
+  console.log(await investigation.run(tool, toolArgs));
+} catch (e) {
+  console.error(`error: ${e.message}`);
+  process.exit(1);
 }
