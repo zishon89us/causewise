@@ -3,9 +3,10 @@
 On-call investigator for Zabbix: turns an incident into a diagnosis with
 evidence, delivered to chat.
 
-> **Status: M3 in progress.** causewise receives Zabbix alerts and forms
-> incidents, and its read-only investigation tools and automatic scorer
-> exist. The agent that uses them, and delivery to chat, are not built yet. Progress: [`docs/STATUS.md`](docs/STATUS.md). Install:
+> **Status: M3, awaiting its first live eval.** causewise receives Zabbix
+> alerts, forms incidents and investigates them with Claude through
+> read-only tools. The investigator has only been run against a mock of the
+> Claude API so far. Delivery to chat is not built yet. Progress: [`docs/STATUS.md`](docs/STATUS.md). Install:
 > [`docs/install.md`](docs/install.md).
 
 ## Results so far
@@ -34,7 +35,8 @@ history, dependencies, timing) and reports the likely cause with the evidence.
 
 | Path | What it is |
 | --- | --- |
-| `src/`, `test/` | The service: webhook receiver, incident former, SQLite store, read-only Zabbix client, investigation tools, scorer |
+| `src/`, `test/` | The service: webhook receiver, incident former, store, read-only Zabbix client, investigation tools, investigator loop, Claude adapter, scorers |
+| `prompts/` | Versioned prompts |
 | `zabbix/` | Webhook script and importable media types for Zabbix 7.0 and 8.0 |
 | `e2e/` | End-to-end check against the lab |
 | `lab/` | Docker Compose lab with Zabbix 7.0 LTS and 8.0 LTS side by side |
@@ -78,6 +80,13 @@ npm run e2e:lab
 
 ```bash
 npm run e2e:tools
+```
+
+Run the investigator on the replayed dataset (calls the Claude API; costs
+money):
+
+```bash
+ANTHROPIC_API_KEY=... npm run eval -- --max-usd 5
 ```
 
 ```bash

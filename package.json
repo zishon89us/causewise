@@ -5,7 +5,9 @@
   "license": "MIT",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.18" },
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning src/main.ts",
     "typecheck": "tsc --noEmit",
@@ -13,10 +15,14 @@
     "check": "npm run typecheck && npm test",
     "e2e:lab": "node --disable-warning=ExperimentalWarning e2e/ingest-lab.mjs",
     "e2e:tools": "node --disable-warning=ExperimentalWarning e2e/tools-lab.mjs",
-    "score": "node --disable-warning=ExperimentalWarning evals/score.mjs"
+    "score": "node --disable-warning=ExperimentalWarning evals/score.mjs",
+    "eval": "node --disable-warning=ExperimentalWarning evals/run.mjs"
   },
   "devDependencies": {
     "@types/node": "22.20.5",
     "typescript": "7.0.2"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.9.0"
   }
 }

@@ -1,0 +1,65 @@
+{
+  "incident": "INC-13",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "hv-02",
+      "what": "Hypervisor hv-02 is saturated (CPU 96-99%, CPU ready ~35-39%) since about 18:20, and the slow HTTP on web-03 and web-04 is most likely VMs starved of CPU there. hv-02 has no alert for this. That web-03 and web-04 run on hv-02 is an assumption: no tags or groups record it.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "web-03 and web-04 guest resources: CPU 24% and 21%, memory 56% and 58%, disk 40%, ICMP loss 0",
+    "Load balancer lb-01: 4 of 4 backends healthy, 5xx 0.06%, CPU 24%",
+    "web-01 and web-02: http.resp.ms about 430-470, normal",
+    "hv-01: CPU 40%, ready 1.1%, normal",
+    "Active maintenance: none",
+    "Network loss to web-03 and web-04: icmp loss 0 and ping OK"
+  ],
+  "evidence": [
+    {
+      "claim": "Only web-03 and web-04 have open problems (Slow HTTP response, opened 18:21:24 and 18:21:33)",
+      "query": 1
+    },
+    {
+      "claim": "web-03 http.resp.ms went from about 390-510 ms to 2993 ms at 18:21 and was 3045 ms at 18:25 (sampled every 60s)",
+      "query": 6
+    },
+    {
+      "claim": "web-04 http.resp.ms went from 399 ms at 18:19:33 to 2982 ms at 18:20:33 and stayed 3000-3500 ms. Its CPU is 20.7%, so the slowdown is not load on the guest",
+      "query": 16
+    },
+    {
+      "claim": "web-01 http.resp.ms is 429 ms and web-02 is 468 ms, so those two are not affected",
+      "query": 7
+    },
+    {
+      "claim": "hv-02 hv.cpu.ready.pct went from 1.87 at 18:17:35 to 38.69 at 18:20:35 and stayed at 35.18 at 18:23:35. This is the same minute the web slowdown began",
+      "query": 13
+    },
+    {
+      "claim": "hv-02 hv.cpu.util.pct went from 39% at 18:17:14 to 98.3% at 18:20:14 and was 98.8% at 18:23:14",
+      "query": 14
+    },
+    {
+      "claim": "hv-01 hv.cpu.ready.pct is 1.09 and CPU 40%, which is healthy",
+      "query": 9
+    },
+    {
+      "claim": "hv-02 has only ICMP loss and ping triggers, so its CPU saturation cannot alert",
+      "query": 15
+    },
+    {
+      "claim": "lb-01 reports 4 healthy backends and 5xx 0.06%",
+      "query": 8
+    },
+    {
+      "claim": "web-04 shows CPU 20.7%, memory 57.5%, ICMP loss 0 and 5xx 0.39% while its response time is 3080 ms",
+      "query": 11
+    }
+  ],
+  "next_step": "Check which VMs are on hv-02 and confirm web-03 and web-04 are among them, then find what started consuming CPU on hv-02 around 18:20 (a noisy neighbour VM, a backup or a migration) and move or throttle it.",
+  "model": "claude-sonnet-5-5",
+  "note": "Run through the Claude Code harness with prompts/investigator/v1.md and tools/zq.mjs; not the product loop."
+}

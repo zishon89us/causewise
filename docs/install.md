@@ -1,7 +1,11 @@
 # Install
 
-Status: M2. causewise currently receives alerts and forms incidents. It does
-not investigate or send anything to chat yet.
+Status: M3. causewise receives alerts, forms incidents and, when configured,
+investigates each one and stores the diagnosis. It does not send anything to
+chat yet; the diagnosis appears in the container log and the local database.
+
+The investigator has not yet been run against the live Claude API (see ADR
+0009). Treat it as untested until the Eval workflow has passed.
 
 Tested against Zabbix 7.0.32 and 8.0.0 in the lab.
 
@@ -23,6 +27,20 @@ docker run -d --name causewise -p 8787:8787 -v causewise-data:/data -e CAUSEWISE
 | `CAUSEWISE_DB` | `/data/causewise.db` | SQLite file |
 | `CAUSEWISE_SETTLE_SECONDS` | `90` | Wait after the first alert before an incident is ready |
 | `CAUSEWISE_QUIET_SECONDS` | `600` | All alerts recovered for this long closes the incident |
+
+To turn on the investigator, also set:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `CAUSEWISE_ZABBIX_URL` | none | Full URL of Zabbix's `api_jsonrpc.php` |
+| `CAUSEWISE_ZABBIX_TOKEN` | none | API token of the read-only user from step 5 |
+| `ANTHROPIC_API_KEY` | none | Claude API key |
+| `CAUSEWISE_MODEL` | `claude-opus-5-5` | Claude model ID |
+| `CAUSEWISE_EFFORT` | `medium` | `low`, `medium`, `high`, `xhigh` or `max` |
+| `CAUSEWISE_MAX_QUERIES` | `30` | Zabbix queries allowed per incident |
+
+Each investigation sends alert names, host names, tags and metric values to
+the Claude API. Masking of host names is not built yet.
 
 A missing or invalid value stops the container with a message naming it.
 
@@ -56,9 +74,9 @@ written for the lab and uses the default Admin account.
 Use the media type's "Test" button, or wait for a real alert, then look at
 the container log for a line with `"event":"alert"`.
 
-## 5. Prepare read-only access (used from the next milestone)
+## 5. Read-only access for the investigator
 
-The investigator will read from the Zabbix API. Give it its own user that
+The investigator reads from the Zabbix API. Give it its own user that
 can do nothing else:
 
 1. Users → User roles → create a role of type "User". Under API access,

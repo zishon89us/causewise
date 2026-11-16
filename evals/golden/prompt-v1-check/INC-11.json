@@ -1,0 +1,89 @@
+{
+  "incident": "INC-11",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "app-01, app-02, app-03, app-04 (app tier)",
+      "what": "A rolling rollout of app version 412 to 413 is producing database errors on each app host as it lands; the database itself is healthy.",
+      "confidence": "medium"
+    },
+    {
+      "host": "dns-01",
+      "what": "dns-01 CPU jumped from about 22% to about 94% at 10:20:45 and DNS query time went from about 24 ms to about 1,800 ms, a separate fault that may add to the slow responses.",
+      "confidence": "low"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "db-01 and db-02 (CPU ~23%, I/O wait 8% and 3%, replication lag 2.6 s and 1 s, connections flat at 52-68) are healthy",
+    "cache-01 is healthy (hit rate 93.7%, 2.5 ms response)",
+    "no active maintenance window",
+    "network or switch fault is unlikely because every host still answers ping with 0% loss on the hosts checked",
+    "the 5xx and slow-response alerts on web-01 to web-04 and lb-01 are symptoms of the app errors, not independent faults"
+  ],
+  "evidence": [
+    {
+      "claim": "db-01 looks normal: CPU 23%, I/O wait 7.9%, replication lag 2.6 s, ping OK",
+      "query": 4
+    },
+    {
+      "claim": "db-02 looks normal: CPU 23.8%, I/O wait 3.5%, replication lag 1.0 s",
+      "query": 5
+    },
+    {
+      "claim": "app-01 db error rate went from 0 to 8.93 at 10:19:42",
+      "query": 11
+    },
+    {
+      "claim": "app-02 db errors began at 10:20:51 (6.16)",
+      "query": 18
+    },
+    {
+      "claim": "app-03 db errors began at 10:22:02 (7.25)",
+      "query": 19
+    },
+    {
+      "claim": "app-04 db errors began at 10:24:27 (6.21)",
+      "query": 20
+    },
+    {
+      "claim": "The onset is staggered by host over about 5 minutes while db-01 connection count stayed flat at 52-68",
+      "query": 17
+    },
+    {
+      "claim": "app-01 version moved 412 to 413 between its 10:16:57 and 10:21:57 samples (sampled every 5 min)",
+      "query": 10
+    },
+    {
+      "claim": "app-02 version moved to 413 between 10:17:52 and 10:22:52",
+      "query": 14
+    },
+    {
+      "claim": "app-04 version moved to 413 at 10:25:51, after its 10:20:51 sample of 412",
+      "query": 15
+    },
+    {
+      "claim": "app-03 still read 412 at 10:21:58 although its errors started at 10:22:02; the next version sample was not yet available, so the version link for app-03 is unconfirmed",
+      "query": 16
+    },
+    {
+      "claim": "dns-01 CPU 21.7% at 10:19:45, then 94.25% at 10:20:45, still 97.9% now",
+      "query": 13
+    },
+    {
+      "claim": "dns-01 query time about 24 ms at 10:19:05, then 1766 ms at 10:20:05, still about 1700 ms",
+      "query": 12
+    },
+    {
+      "claim": "cache-01 normal: hit 93.7%, 2.46 ms",
+      "query": 22
+    },
+    {
+      "claim": "No maintenance window is active",
+      "query": 21
+    }
+  ],
+  "next_step": "Check the deployment log for the 413 release: confirm the rollout order and times and roll back, or pause, the release on the remaining hosts. Also look at what is using dns-01's CPU (for example a query flood), as a separate task.",
+  "model": "claude-sonnet-5-5",
+  "note": "Run through the Claude Code harness with prompts/investigator/v1.md and tools/zq.mjs; not the product loop."
+}

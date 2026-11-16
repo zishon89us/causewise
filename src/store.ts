@@ -4,6 +4,9 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { Alert } from './alert.ts';
+import type { Diagnosis } from './diagnosis.ts';
+import type { InvestigationResult } from './investigator.ts';
+import type { QueryRecord } from './tools.ts';
 
 export type IncidentState = 'settling' | 'ready' | 'closed';
 
@@ -44,6 +47,30 @@ const MIGRATIONS = [
      recovered_at INTEGER
    );
    CREATE INDEX alerts_incident ON alerts(incident_id);`,
+  `CREATE TABLE diagnoses (
+     incident_id INTEGER PRIMARY KEY REFERENCES incidents(id),
+     created_at INTEGER NOT NULL,
+     verdict TEXT NOT NULL,
+     diagnosis_json TEXT NOT NULL,
+     stopped_because TEXT,
+     prompt_version TEXT NOT NULL,
+     models TEXT NOT NULL,
+     turns INTEGER NOT NULL,
+     input_tokens INTEGER NOT NULL,
+     output_tokens INTEGER NOT NULL,
+     cache_read_tokens INTEGER NOT NULL,
+     cache_write_tokens INTEGER NOT NULL,
+     cost_usd REAL
+   );
+   CREATE TABLE queries (
+     incident_id INTEGER NOT NULL REFERENCES incidents(id),
+     seq INTEGER NOT NULL,
+     tool TEXT NOT NULL,
+     args_json TEXT NOT NULL,
+     rows INTEGER NOT NULL,
+     output TEXT NOT NULL,
+     PRIMARY KEY (incident_id, seq)
+   );`,
 ];
 
 interface IncidentRow {
@@ -170,6 +197,40 @@ export class Store {
       recoveredAt: r.recovered_at,
       incidentId: r.incident_id,
     }));
+  }
+
+  /** Store a finished investigation: the diagnosis and every query behind it (US-10). */
+  saveInvestigation(incidentId: number, now: number, result: InvestigationResult, log: QueryRecord[], promptVersion: string, costUsd: number | null): void {
+    this.transaction(() => {
+      this.db
+        .prepare(
+          `INSERT OR REPLACE INTO diagnoses (incident_id, created_at, verdict, diagnosis_json, stopped_because, prompt_version, models,
+             turns, input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          incidentId, now, result.diagnosis.verdict, JSON.stringify(result.diagnosis), result.stoppedBecause ?? null, promptVersion,
+          result.models.join(','), result.turns, result.usage.inputTokens, result.usage.outputTokens,
+          result.usage.cacheReadTokens, result.usage.cacheWriteTokens, costUsd,
+        );
+      this.db.prepare('DELETE FROM queries WHERE incident_id = ?').run(incidentId);
+      const insert = this.db.prepare('INSERT INTO queries (incident_id, seq, tool, args_json, rows, output) VALUES (?, ?, ?, ?, ?, ?)');
+      for (const q of log) insert.run(incidentId, q.seq, q.tool, JSON.stringify(q.args), q.rows, q.output);
+    });
+  }
+
+  diagnosis(incidentId: number): { diagnosis: Diagnosis; promptVersion: string; models: string; costUsd: number | null } | null {
+    const r = this.db.prepare('SELECT diagnosis_json, prompt_version, models, cost_usd FROM diagnoses WHERE incident_id = ?').get(incidentId) as
+      | { diagnosis_json: string; prompt_version: string; models: string; cost_usd: number | null }
+      | undefined;
+    return r ? { diagnosis: JSON.parse(r.diagnosis_json), promptVersion: r.prompt_version, models: r.models, costUsd: r.cost_usd } : null;
+  }
+
+  queries(incidentId: number): QueryRecord[] {
+    const rows = this.db.prepare('SELECT seq, tool, args_json, rows, output FROM queries WHERE incident_id = ? ORDER BY seq').all(incidentId) as unknown as Array<{
+      seq: number; tool: string; args_json: string; rows: number; output: string;
+    }>;
+    return rows.map((r) => ({ seq: r.seq, tool: r.tool, args: JSON.parse(r.args_json), rows: r.rows, output: r.output }));
   }
 
   /** Settling incidents whose settle window has passed become ready. */

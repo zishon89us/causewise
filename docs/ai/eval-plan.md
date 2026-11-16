@@ -32,7 +32,7 @@ live only in `sim/scenarios.mjs`.
 | Cause accuracy | Verdict matches; every fault is named (at any confidence); and no cause that points at nothing true is given at medium or high confidence | `src/eval/score.ts` |
 | False blame | A host that is not a cause is named at high confidence | `src/eval/score.ts` |
 | Unrelated separation | Older, unrelated alerts are listed as unrelated and not put forward as causes | `src/eval/score.ts` |
-| Evidence validity | Each evidence claim's numbers appear in the output of the query it cites | Deterministic check on recorded tool output |
+| Evidence validity | Each evidence claim's numbers and times appear in the output of the query it cites (rounding allowed) | `src/eval/evidence.ts`, a text heuristic |
 | Mechanism | The explanation of *what* is wrong matches the scenario summary | Model grader with a written rubric, validated against a hand-labelled set before use |
 | Cost and effort | Queries, tokens, cost and wall time per incident | Recorded |
 
@@ -83,6 +83,33 @@ The one miss: two concurrent faults (slow DNS and a bad deployment). The
 investigator found the DNS fault and dismissed the deployment, misled by a
 version metric sampled every five minutes.
 
+### Prompt v1 and the new tools, six incidents (2026-11-16)
+
+After the tools gained value ages, sampling intervals and "stopped
+reporting" flags, and `prompts/investigator/v1.md` was written, six hard
+incidents were re-run blind on Claude Sonnet 5.5: stale metrics, the
+two-fault case missed above, two independent faults, no tags, an
+undeterminable cause and a resolved cause. Automatic score: 6 of 6, no
+false blame. In the two-fault case the model noted that the version metric
+is sampled every five minutes and treated the one unconfirmed host as
+unconfirmed, which is the behaviour the change was meant to produce.
+
+This is one run of six incidents through the Claude Code harness, using the
+product's prompt and tools but **not** the product's loop or API adapter.
+It is not a threshold measurement. Answers: `evals/golden/prompt-v1-check/`.
+
+## Running the real eval
+
+`npm run eval` (`evals/run.mjs`) runs the product loop against a replayed
+dataset, scores it, checks evidence, estimates cost and compares against
+the thresholds below. `--baseline` runs the alerts-only baseline with the
+same code. It needs `ANTHROPIC_API_KEY`.
+
+The Eval workflow (`.github/workflows/eval.yml`) does all of it in GitHub
+Actions: starts Zabbix, replays the dataset, runs the eval with the
+repository secret `ANTHROPIC_API_KEY`, and uploads the results. It is
+started by hand and has a spend cap input. **It has not been run yet.**
+
 ## Thresholds for M3
 
 Measured over three runs per incident, mean across runs.
@@ -112,16 +139,19 @@ family. A threshold changes only by its own pull request with reasons.
 5. **Injection.** Add a red-team set: instructions planted in alert names,
    tags and item values. Zero tool misuse is required.
 6. **Smaller and local models.** Not yet evaluated.
-7. **Mechanism and evidence graders.** Cause accuracy, false blame and
-   unrelated separation are automated. Evidence validity and the mechanism
-   grader are not written yet; they need the tool output the agent loop
-   will record.
+7. **Mechanism grader.** Not written. The deterministic scorer cannot tell
+   whether an explanation is right, only which hosts it names.
+8. **Evidence validity is a heuristic.** It matches numbers and times in
+   text. It has unit tests but has not been checked against real model
+   output; expect to tune it after the first live run.
+9. **No live run of the product loop yet.**
 
 ## Process
 
-- `make eval` runs the suite and writes a report with baselines.
-- CI runs a fast subset on any change to prompts, tools or the agent loop,
-  and fails on a threshold breach or a regression against the stored
-  baseline.
+- `npm run eval` runs the suite and writes a report; `--baseline` gives the
+  alerts-only numbers to report beside it.
+- The Eval workflow runs it on demand. Running a subset automatically on
+  changes to prompts, tools or the loop is not set up yet: it needs the
+  first live run to establish a baseline and a cost.
 - Every miss in a pilot or in production becomes a scenario before the fix
   merges.

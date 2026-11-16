@@ -1,0 +1,67 @@
+{
+  "incident": "INC-20",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "core-rtr-01 / dist-sw-01 (resolved network disruption, 22:20-22:23)",
+      "what": "A short link-down on core-rtr-01 to dist-sw-01 with loss on the web tier and lb-01 backends dropping below 2 healthy seems to have started a backlog: job queues jumped to about 1,300-1,400 on the app tier at 22:22 and are draining slowly, so response times stay high after the network recovered. The app tier is not tagged as behind dist-sw-01, so this link is an inference from timing, not a recorded dependency.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "db-01 and db-02: CPU about 21-24%, IO wait about 4%, slow queries about 2.8/min, replication lag 1-3s, no DB alerts; the connection count rose from about 60 to about 165 at 22:22, in step with the app slowdown, so it looks like a symptom",
+    "nas-01 storage: latency 3.6ms and flat, no change",
+    "cache-01: hit rate 94% and response time 4.7ms, normal",
+    "hv-01 (CPU ready 2.4%, CPU 48%) and dist-sw-02 (uplink up, 0% loss)",
+    "lb-01 now: 4 of 4 backends healthy, 5xx 0.28%",
+    "app deploy or version change: app.version is 412 on app-01 for the whole hour",
+    "app CPU/memory exhaustion: app-01 CPU 21%, app-03 CPU 29%",
+    "maintenance: no active window"
+  ],
+  "evidence": [
+    {
+      "claim": "At 22:20:24-22:22:59 lb-01 had fewer than 2 healthy backends and a high 5xx rate, core-rtr-01 had its link to dist-sw-01 down, and ping loss alerted on dist-sw-01, hv-02 and all 4 web hosts; all of these resolved by 22:22:59",
+      "query": 2
+    },
+    {
+      "claim": "The slow-response and job-queue alerts opened afterwards, 22:23:01-22:24:44, on all 4 app and all 4 web hosts",
+      "query": 1
+    },
+    {
+      "claim": "The app-01 queue jumped from 34 at 22:21:09 to 1394 at 22:22:09 and is draining only about 43 per minute (1266 at 22:25:09)",
+      "query": 22
+    },
+    {
+      "claim": "The app-01 response time was about 290-400ms until 22:21:48, then 1777ms at 22:22:48 and about 1800-1990ms since",
+      "query": 10
+    },
+    {
+      "claim": "The web-01 response time went from about 400ms to 2424ms at 22:22:51, and its samples for 22:20:51 and 22:21:51 are missing",
+      "query": 23
+    },
+    {
+      "claim": "The db-01 connection count went from about 52-69 to 170 at 22:22:27 and is still 160",
+      "query": 11
+    },
+    {
+      "claim": "The DB, cache, NAS, hypervisor and switch metrics are all within normal ranges at 22:26",
+      "query": 4
+    },
+    {
+      "claim": "The db-01 IO wait stayed 2-8% with no step change and nas-01 latency stayed 2.5-5.5ms with no step change",
+      "query": 18
+    },
+    {
+      "claim": "The load balancer shows 4 healthy backends and 0.28% 5xx now",
+      "query": 21
+    },
+    {
+      "claim": "The app tier hosts are tagged upstream=dist-sw-02, not dist-sw-01, and show no ping loss",
+      "query": 3
+    }
+  ],
+  "next_step": "Check app-tier logs and the job worker/DB pool on app-01..04 for what stalled at about 22:21-22:22 (a connection pool stall or retry storm after the link flap), and find why the core-rtr-01 to dist-sw-01 link dropped. If the queue does not drain, restart the workers or pools.",
+  "model": "claude-sonnet-5-5",
+  "note": "Run through the Claude Code harness with prompts/investigator/v1.md and tools/zq.mjs; not the product loop."
+}

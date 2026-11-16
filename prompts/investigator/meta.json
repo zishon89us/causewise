@@ -1,0 +1,9 @@
+{
+  "name": "investigator",
+  "current": "v1",
+  "owner": "maintainer",
+  "intended_use": "System prompt for the on-call investigation loop (src/investigator.ts). The model has seven read-only Zabbix tools and must finish by calling submit_diagnosis.",
+  "changelog": [
+    { "version": "v1", "date": "2026-11-16", "note": "First version. Built from what the M0 and M1 pilots showed: symptoms outnumber causes, causes may have no alert, stale metrics mislead, and the cause may already have recovered." }
+  ]
+}
