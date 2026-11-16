@@ -1,0 +1,29 @@
+{
+  "incident": "INC-22",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "cache-01",
+      "what": "Memory on cache-01 climbed steadily (a leak or unbounded growth) and saturated at 97% around 00:45. Evictions then cut the cache hit ratio from about 91% to 38%. The misses push load onto db-01, with slow queries and connections rising, and that makes the app and web tiers slow.",
+      "confidence": "high"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "nas-01 storage (latency 5.7 ms, normal)",
+    "db-01 disk I/O (io wait 3.9%)",
+    "network or switch (no host-down or packet-loss alerts)",
+    "hypervisor or switch fault (alerts are spread across hv-01, hv-02, dist-sw-01 and dist-sw-02 hosts, with no shared pattern)",
+    "db replication (lag 0.1 s)",
+    "db-01 as the original cause (its slow queries rose after the cache degraded)"
+  ],
+  "evidence": [
+    "cache-01 mem.util rose linearly from about 61% at 00:09 to 97% at about 00:45, then stayed flat at 97% (alert at 00:38)",
+    "cache.hit.pct was about 91% until 00:45, then fell steadily to 84.6% at 00:51, 65.9% at 01:09 and 38% at 01:39",
+    "db-01 slow queries rose from 3.4/s at 00:43 to 39/s at 01:39, and connections from 53 to 167, following the hit ratio decline",
+    "db-01 CPU is 31% and io wait is 3.9%, so the db is slow from query volume, not from a resource fault or storage",
+    "App and web slow-response alerts began at 01:21-01:26, after the cache and db degradation"
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 10
+}

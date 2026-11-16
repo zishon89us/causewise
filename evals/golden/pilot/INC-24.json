@@ -1,0 +1,28 @@
+{
+  "incident": "INC-24",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "hv-02",
+      "what": "The hypervisor hv-02 is CPU-saturated (95% util, 34% CPU ready). The VMs on it, web-03 and web-04, are starved of CPU and respond slowly. The workload driving hv-02 is not visible in the monitoring data.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "web-03/web-04 guest CPU (about 21%, not the bottleneck)",
+    "network or dist-sw-01 (web-01/02 on the same switch are healthy at about 420ms; icmp loss is 0)",
+    "web-03/web-04 memory or disk (mem 54%, fs 40%)",
+    "5xx errors (about 0.1%)"
+  ],
+  "evidence": [
+    "The only alerts are Slow HTTP response on web-03 (09:35:29) and web-04 (09:35:32), the two hosts on hv-02.",
+    "hv-02 hv.cpu.util.pct was steady at 37-52% for 90 minutes, then 95.46% at 09:39.",
+    "hv-02 hv.cpu.ready.pct was 1-2.5% until about 09:33, then 34.27% at 09:39.",
+    "web-03 http.resp.ms was about 400-490ms until 09:31, then 3412ms at 09:35 and 3037ms at 09:39.",
+    "web-03 guest cpu.util is 20.6% while hypervisor CPU ready is high, which points to host-level contention and not a guest problem.",
+    "web-01 on dist-sw-01 (no hypervisor tag) shows 420ms response, cpu 23.6%."
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 9
+}
