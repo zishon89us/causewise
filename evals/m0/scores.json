@@ -1,0 +1,16 @@
+{
+  "note": "Scored by hand against sim/scenarios.mjs. 'correct' means the answer names the true cause as the primary cause. Scorer: the AI agent that also wrote the scenarios; not independently reviewed.",
+  "scores": [
+    { "id": "INC-01", "scenario": "switch-uplink-down", "investigator": "correct", "alerts_only": "correct" },
+    { "id": "INC-02", "scenario": "db-volume-full", "investigator": "correct", "alerts_only": "correct" },
+    { "id": "INC-03", "scenario": "hypervisor-cpu-contention", "investigator": "correct", "alerts_only": "wrong", "comment": "Cause has no alert. Alerts-only blamed cache-01, a symptom." },
+    { "id": "INC-04", "scenario": "dns-resolver-slow", "investigator": "correct", "alerts_only": "correct" },
+    { "id": "INC-05", "scenario": "storage-latency", "investigator": "correct", "alerts_only": "correct" },
+    { "id": "INC-06", "scenario": "app-memory-leak", "investigator": "correct", "alerts_only": "correct", "comment": "Alerts-only named the right host but not the memory leak; the investigator found the leak and the crash loop." },
+    { "id": "INC-07", "scenario": "bad-deploy", "investigator": "correct", "alerts_only": "correct", "comment": "Investigator's cause is right (build 413 rollout) but it wrongly inferred that nodes still on 412 were failing; the version item is only sampled every 5 minutes, so it was reading stale values." },
+    { "id": "INC-08", "scenario": "core-router-packet-loss", "investigator": "correct", "alerts_only": "correct" },
+    { "id": "INC-09", "scenario": "two-independent-faults", "investigator": "correct", "alerts_only": "wrong", "comment": "Alerts-only named both hosts but blamed db-02 (the unrelated replica) for the slowdown. The investigator separated the two faults correctly." },
+    { "id": "INC-10", "scenario": "load-balancer-health-checks", "investigator": "correct", "alerts_only": "correct", "comment": "Investigator also listed the unrelated db-02 alert as a second low-confidence cause, while marking it unrelated." }
+  ],
+  "totals": { "investigator": "10/10", "alerts_only": "8/10" }
+}

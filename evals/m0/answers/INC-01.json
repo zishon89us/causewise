@@ -1,0 +1,21 @@
+{
+  "incident": "INC-01",
+  "causes": [
+    {
+      "host": "dist-sw-02",
+      "what": "The distribution switch dist-sw-02 (or its uplink to core-rtr-01) failed at about 11:02. The router's port to it went down and everything behind the switch is unreachable: app-01..04, db-01, db-02, cache-01 and hv-01.",
+      "confidence": "high"
+    }
+  ],
+  "unrelated_alerts": [],
+  "evidence": [
+    "core-rtr-01 'Link down: to dist-sw-02' fired at 11:02:04, the first event. if.status[dist-sw-02]=0 while if.status[dist-sw-01]=1.",
+    "dist-sw-02 shows 100% ICMP loss; its last metric samples are at about 11:01. Every host with upstream=dist-sw-02 (app-01..04, db-01, db-02, cache-01, hv-01) went to ping loss at 11:03-11:04 and then unavailable at 11:04-11:05.",
+    "web-01 http.5xx.pct jumped from about 0.3% to 87% at 11:02:03 and stays at 81-88%. lb-01 5xx is 87.8%. The web hosts sit behind dist-sw-01 and are reachable (0% ICMP loss), so the 5xx is a symptom of the app/db tier being cut off.",
+    "core-rtr-01 is healthy: 0% loss throughout, and its if.errors.rate is noisy at 0-1 for the whole hour with no change before 11:02. dist-sw-02 errors are the same. nas-01 (5.75 ms latency, 0% loss) and hv-02 (cpu 42%, cpu ready 2.5%) are normal. No earlier precursor was found.",
+    "All 24 open problems start between 11:02 and 11:05, so none is older or unrelated."
+  ],
+  "queries_used": 4,
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 13
+}

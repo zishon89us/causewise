@@ -1,0 +1,22 @@
+{
+  "incident": "INC-04",
+  "causes": [
+    {
+      "host": "dns-01",
+      "what": "The DNS server's CPU jumped from about 25% to about 95% at about 23:02. Its query latency is now about 1868 ms, and the web and app tiers that depend on it for name resolution are slow as a result. No alert names the process behind the CPU load.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "evidence": [
+    "dns-01 cpu.util.pct was 18-32% for the hour before, then 94.8% at 23:02:53 and 94-97% since (step change, not gradual).",
+    "dns-01 dns.query.ms is 1868 ms.",
+    "All 8 web and app 'Slow' alerts fired within 23:03:01-23:03:50, and the dns-01 'Slow DNS resolution' alert fired at 23:03:54, all right after the CPU jump. Nothing else in the 120-minute event window changed.",
+    "web-01 http.resp.ms is 2437 ms and app-01 app.resp.ms is 1929 ms, with cpu around 21%, memory around 52-57% and no db errors. The web and app hosts are not saturated themselves.",
+    "Backend checks look normal: db-01 io wait 2.5%, replication lag 2.8 s, db errors 0; nas-01 latency 5 ms; hv-01 cpu ready 1.2%; core-rtr-01 loss 0 with all interfaces up; lb-01 backends healthy 4/4. No independent fault found.",
+    "I did not check metrics on dist-sw-01, dist-sw-02, hv-02 or db-02. I also did not query dns-01 history for dns.query.ms, or the web and app hosts' response-time history, to confirm they started rising at the same time as the CPU. Whether those hosts depend on dns-01 is inferred, since the topology tags do not mention DNS."
+  ],
+  "queries_used": 8,
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 12
+}

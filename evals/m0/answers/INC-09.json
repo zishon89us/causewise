@@ -1,0 +1,32 @@
+{
+  "incident": "INC-09",
+  "causes": [
+    {
+      "host": "cache-01",
+      "what": "The cache stopped serving hits at 19:02:44: hit ratio fell from about 92% to 0% in one step, with no change in the host's CPU, memory or ping. This looks like a flush, restart or cold or broken cache. All reads now go to db-01, so the shop app and web tiers are slow.",
+      "confidence": "high"
+    },
+    {
+      "host": "db-02",
+      "what": "The replica has an independent fault that began at 19:00, before the cache failure. Replication has stalled, with lag growing about 100s per minute until it capped at 400s at 19:04. I/O wait rose from about 5% to about 30%, and CPU and slow queries followed. It is a local replica problem (I/O or replay stall) and not a result of the cache loss, though it is not clearly part of the user-facing slowness.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [
+    "db-02: Replication lag is high (separate, earlier fault)",
+    "db-02: High CPU utilization (replica fault)",
+    "db-02: High rate of slow queries (replica fault)"
+  ],
+  "evidence": [
+    "cache-01 cache.hit.pct was 89-95% for the hour before, then 0 from 19:02:44 on, a step change",
+    "db-01 db.conn.count went from about 55-69 to about 140-155 at 19:02:37, matching the cache collapse",
+    "The app and web slow-response alerts all fired at 19:03:01-19:03:57, within about 1 minute of the cache drop, on every app and web host",
+    "db-02 db.repl.lag.s was about 0-4s until 18:59, then 12s at 19:00, 111s at 19:01, 211s at 19:02, 310s at 19:03 and 400s from 19:04",
+    "db-02 db.io.wait.pct went from about 2-8% to about 28% at 19:00:17 and stayed at 26-33%, before the cache event",
+    "nas-01 latency stayed normal at 2-6ms and db-01 io wait is 5.4%, so storage is not the cause",
+    "db-01 CPU is 67% and db-02 CPU is 91%; no network or hypervisor symptoms (all ping and loss normal)"
+  ],
+  "queries_used": 4,
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 12
+}
