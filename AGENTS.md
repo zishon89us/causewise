@@ -72,7 +72,8 @@ tested. Mark anything untested as an assumption.
 
 ## 3. Stack (defaults; each confirmed in an ADR)
 
-TypeScript on Node.js LTS, one process, SQLite, Docker image. See
+TypeScript on Node.js LTS, one process, SQLite, Docker image, Claude through
+the official Anthropic SDK. See
 `docs/adr/` and `docs/design/architecture.md`.
 
 ## 4. Conventions

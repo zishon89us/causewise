@@ -5,7 +5,6 @@ delivery input and the eval scorer all use this shape.
 
 ```json
 {
-  "incident": "INC-0042",
   "verdict": "cause_found | benign | undetermined | incomplete",
   "causes": [
     { "host": "nas-01", "what": "one sentence", "confidence": "high | medium | low" }
@@ -15,19 +14,24 @@ delivery input and the eval scorer all use this shape.
   "evidence": [
     { "claim": "nas-01 latency rose from 4 ms to 120 ms at 03:02", "query": 7 }
   ],
-  "next_step": "one suggested check or action for a human",
-  "queries": 12,
-  "degraded": false
+  "next_step": "one suggested check or action for a human"
 }
 ```
+
+Defined in `src/diagnosis.ts`. Stored beside it for each incident: every
+query with its output, the prompt version, the models that served it, turn
+and token counts, and estimated cost.
 
 Rules:
 
 - `causes` has more than one entry only for independent faults.
 - `undetermined` has empty `causes` and a non-empty `ruled_out`.
 - `benign` means no real outage; `causes` is empty.
-- `incomplete` means a budget was hit; whatever was found is reported.
-- Every `evidence` item points at the query that produced it. A claim with
-  no supporting query is a defect.
-- `degraded: true` means no investigation ran (provider failure or daily
-  budget exhausted) and the content is an alerts-only summary.
+- `incomplete` is set by the loop, never by the model: the provider
+  declined, output was cut off, the model would not submit, or it could not
+  produce a valid diagnosis. `causes` is empty and `next_step` says to
+  investigate by hand.
+- Every `evidence` item cites the number of a query that ran; a diagnosis
+  citing a query that does not exist is sent back to the model.
+- Not built yet: the degraded alerts-only summary when the provider is
+  down or a daily budget is exhausted (US-8).
