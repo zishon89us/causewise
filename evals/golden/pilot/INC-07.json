@@ -1,0 +1,29 @@
+{
+  "incident": "INC-07",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "nas-01",
+      "what": "The shared storage backend degraded at about 13:33 (latency jumped from about 4 ms to about 130 ms and IOPS fell from about 1700 to about 300). db-01 stalls on this storage, and the web and app tiers slow down behind it.",
+      "confidence": "high"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "db-02: all metrics normal (io wait 6%, connections 70, slow queries 1.6)",
+    "app tier code or deploy: app.db.errors.rate is 0 and the app.version metric is unchanged",
+    "hv-01: cpu ready 3%, cpu 38%, no sign of contention",
+    "db-01 CPU, memory and disk space: cpu 33%, mem 54%, data fs 62%",
+    "network: ICMP loss 0 and ping OK on the hosts checked (db-01, nas-01, db-02, app-01, hv-01)"
+  ],
+  "evidence": [
+    "nas-01 nas.latency.ms went from 2-6 ms to 133 ms at 13:33:53 and stays at 122-133 ms",
+    "nas-01 nas.iops went from about 1600-2100 to 337 at 13:34:25 and stays at 240-350",
+    "db-01 io wait went from under 8% to 59% at 13:35:08, about 1-2 minutes after the NAS step, and is still 54.5%",
+    "db-01 slow queries went from about 2/s to 40/s at 13:35:44; connections rose from about 55 to 92, 160 and 195 (looks capped at 195) between 13:35 and 13:37",
+    "The NAS alert fired at 13:35:53; the db-01 I/O wait, slow-query and connection alerts followed at 13:37-13:38",
+    "The web-01..04 Slow HTTP response and app-01..04 Slow application response alerts fired at 13:35:51-13:36:28 and the app Job queue alerts at 13:39 (app-01 queue depth 900, response 1994 ms); these come after the storage and db-01 change and are downstream symptoms"
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 13
+}

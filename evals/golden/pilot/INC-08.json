@@ -1,0 +1,29 @@
+{
+  "incident": "INC-08",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "nas-01",
+      "what": "The NAS that backs the db-01 primary storage has a latency spike (about 3-5 ms to about 32-36 ms) and an IOPS drop (about 1800 to about 850). That stalls db-01 disk I/O, slows queries, and causes the slow responses across the app and web tiers.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "hv-01 (cpu ready 1.9%, util 53%)",
+    "db-01 CPU, memory and filesystem (cpu 22%, mem 52%, data fs 62%)",
+    "network or switch fault (no icmp loss, and the pattern is not specific to one switch)",
+    "db replica (db-02) as a cause (not checked in detail)"
+  ],
+  "evidence": [
+    "nas-01 latency jumped from 5.05 ms at 17:33 to 32.9 ms at 17:34 and has stayed at 32-36 ms since.",
+    "nas-01 IOPS dropped from about 1990 at 17:32 to about 820 at 17:35.",
+    "db-01 io wait went from 6.3% at 17:33 to 51.8% at 17:34, about 1 minute after the NAS latency jump and a minute before the first alert.",
+    "db-01 slow queries are at 26/s, connections at 119, and replication lag at 3.6 s.",
+    "All 4 web and all 4 app Slow-response alerts fired at 17:35-17:37, after the NAS and db I/O change.",
+    "db-01 has the tag storage=nas-01, and the web and app alerts span hosts on both distribution switches and both hypervisors, which points to a shared backend (db-01) rather than a switch or hypervisor fault.",
+    "The NAS has no alert of its own, because its latency is below any threshold. It is the earliest change in the data."
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 11
+}

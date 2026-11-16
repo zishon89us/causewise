@@ -1,0 +1,22 @@
+{
+  "incident": "INC-08",
+  "causes": [
+    {
+      "host": "core-rtr-01",
+      "what": "Core router has a sudden interface error storm (about 400 errors/s versus under 1 normally) that causes 27-41% packet loss on every host behind it, including both distribution switches and everything downstream.",
+      "confidence": "high"
+    }
+  ],
+  "unrelated_alerts": [],
+  "evidence": [
+    "core-rtr-01 if.errors.rate was under 1 until 15:00:59, then jumped to 422 at 15:01:59 and stayed at about 360-433 through 15:06:59.",
+    "Ping loss alerts opened on 19 hosts between 15:02:58 and 15:03:55, about 1-2 minutes after the router errors began.",
+    "Current ICMP loss is 28-41% on all hosts (lb-01 41%, db-01 40%, nas-01 38%, web-03 38%, dist-sw-02 32%, dist-sw-01 28%, hv-02 36%), which is a network-wide pattern.",
+    "dist-sw-01 and dist-sw-02 interface errors are about 0.6-0.9 and their uplink status is up, so the fault sits at the router, not the switches.",
+    "Application and storage metrics look normal: db-01 repl lag 2s, io wait 7%, nas latency 3.1ms, lb backends healthy 4, app db errors 0.",
+    "The app-01 and web-03 'Unavailable by ICMP' alerts (app-01 resolved) are just ping-loss flaps and are symptoms."
+  ],
+  "queries_used": 6,
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 13
+}

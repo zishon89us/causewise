@@ -1,0 +1,23 @@
+{
+  "incident": "INC-05",
+  "causes": [
+    {
+      "host": "nas-01",
+      "what": "The NAS that backs the primary database (db-01 storage=nas-01) went into a storage fault at about 03:02. Latency rose from about 4ms to about 125ms and IOPS fell from about 1800 to about 300, so db-01 is blocked on I/O and the whole shop stack is slow.",
+      "confidence": "high"
+    }
+  ],
+  "unrelated_alerts": [],
+  "evidence": [
+    "nas-01 nas.latency.ms went from 2-6ms steady to 125.7ms at 03:02:00 and stayed at 118-134ms. nas.iops fell from about 1800 to about 314 at 03:02:48.",
+    "db-01 db.io.wait.pct went from about 3% at 03:02:34 to 62.5% at 03:03:34 and 65.6% now. The NAS change came first.",
+    "db-01 now has 195 connections and a slow-query rate of 49. Its CPU and memory are normal, and nas-01's CPU is 27%.",
+    "The nas-01 alert (03:04:00) was followed by app and web 'Slow response' alerts (03:04:01-03:04:48). db-01's own alerts (slow queries, I/O wait, connections) came at 03:05:29-03:06:32. The app job queues backed up at 03:07:21-03:07:42.",
+    "The hosts tags show db-01 storage=nas-01 and the app tier depends on db-01. The slowness is therefore a chain: nas-01 to db-01 to app-01..04 to web-01..04.",
+    "Network looks fine: icmp loss is 0 on nas-01 and db-01. The web hosts sit under dist-sw-01 and the app hosts under dist-sw-02, and both are affected, so this is not a switch fault.",
+    "I did not find a trigger for the NAS fault in the metrics I checked, for example a disk filling up. fs.data.pct is 62% and fs.root.pct is 40%. The cause is probably at the storage layer, such as a disk or RAID rebuild, a failing controller or a noisy workload."
+  ],
+  "queries_used": 5,
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 8
+}

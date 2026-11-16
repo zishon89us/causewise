@@ -1,0 +1,29 @@
+{
+  "incident": "INC-18",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "hv-01",
+      "what": "Hypervisor hv-01 CPU saturated from about 09:34 (util 98%, CPU ready 35%), which most likely starves the cache-01 VM. cache-01 response went from about 4 ms to 80-95 ms, and that slows the app and web tiers. I could not confirm from monitoring that cache-01 runs on hv-01, because no host tags are recorded.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "db-01/db-02 (IO wait about 2.5%, replication lag 1-4 s, no change, app.db.errors.rate 0)",
+    "cache-01 own CPU (27%), memory (52%), and hit ratio (90-95%, normal)",
+    "app deploy or version change (app.version steady at 412)",
+    "network and ICMP (no loss on any host checked)",
+    "nas-01 (latency 4 ms)",
+    "hv-02 (CPU 51%, ready 2.7%)"
+  ],
+  "evidence": [
+    "hv-01 CPU util rose from about 45% to 95% at 09:34 and stayed at 96-98% until 09:39",
+    "hv-01 CPU ready rose from about 2% to 36-40% at 09:33-09:34",
+    "cache-01 cache.resp.ms went from 4.4 ms at 09:33 to 85 ms at 09:34, and was still 94.7 ms at 09:39",
+    "Slow response alerts on web-01 to web-04, app-01, app-02 and cache-01 all opened between 09:34:55 and 09:35:41, after the cache and hypervisor change",
+    "app-01 queue depth is 650 and app resp is 2392 ms. app-03 is normal (queue 48, resp 635 ms) and app-02 was not queried. Job queue warnings opened at 09:37 and 09:38 are downstream effects"
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 18
+}

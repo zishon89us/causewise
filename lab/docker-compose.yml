@@ -1,0 +1,60 @@
+# Local lab: one Zabbix 7.0 LTS stack and one 8.0 LTS stack, side by side.
+# Throwaway credentials, for local use only. Never expose these ports.
+name: causewise-lab
+
+x-db: &db
+  image: postgres:16-alpine
+  environment:
+    POSTGRES_USER: zabbix
+    POSTGRES_PASSWORD: zabbix
+    POSTGRES_DB: zabbix
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U zabbix"]
+    interval: 5s
+    retries: 20
+
+x-zbx-env: &zbx-env
+  POSTGRES_USER: zabbix
+  POSTGRES_PASSWORD: zabbix
+  POSTGRES_DB: zabbix
+
+services:
+  db70:
+    <<: *db
+  server70:
+    image: zabbix/zabbix-server-pgsql:alpine-7.0-latest
+    environment:
+      <<: *zbx-env
+      DB_SERVER_HOST: db70
+    depends_on:
+      db70: { condition: service_healthy }
+    ports: ["127.0.0.1:10070:10051"]
+  web70:
+    image: zabbix/zabbix-web-nginx-pgsql:alpine-7.0-latest
+    environment:
+      <<: *zbx-env
+      DB_SERVER_HOST: db70
+      ZBX_SERVER_HOST: server70
+      PHP_TZ: UTC
+    depends_on: [server70]
+    ports: ["127.0.0.1:8070:8080"]
+
+  db80:
+    <<: *db
+  server80:
+    image: zabbix/zabbix-server-pgsql:alpine-8.0-latest
+    environment:
+      <<: *zbx-env
+      DB_SERVER_HOST: db80
+    depends_on:
+      db80: { condition: service_healthy }
+    ports: ["127.0.0.1:10080:10051"]
+  web80:
+    image: zabbix/zabbix-web-nginx-pgsql:alpine-8.0-latest
+    environment:
+      <<: *zbx-env
+      DB_SERVER_HOST: db80
+      ZBX_SERVER_HOST: server80
+      PHP_TZ: UTC
+    depends_on: [server80]
+    ports: ["127.0.0.1:8080:8080"]

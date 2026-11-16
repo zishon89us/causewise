@@ -1,0 +1,211 @@
+{
+  "note": "Pilot run on the golden dataset, 2026-11-16. Scored by hand against sim/scenarios.mjs by the AI agent that wrote the scenarios; not independently reviewed. One run per incident. The investigator was run only on the 14 incidents that are new since M0 (new scenarios and no-tags variants); the other 10 repeat M0 scenarios, where it scored 10/10 on an earlier replay (evals/m0).",
+  "model": "claude-sonnet-5-5",
+  "totals": {
+    "investigator_new_incidents": "13/14",
+    "alerts_only_same_incidents": "4/14",
+    "alerts_only_all": "12/24",
+    "alerts_only_when_cause_has_no_alert": "0/10",
+    "alerts_only_when_cause_has_alert": "12/14"
+  },
+  "scores": [
+    {
+      "id": "INC-01",
+      "scenario": "cache-hung-stale-metrics",
+      "hide_tags": false,
+      "cause_has_alert": false,
+      "investigator": "correct",
+      "alerts_only": "wrong",
+      "comment": "Alerts-only blamed db-01, a symptom."
+    },
+    {
+      "id": "INC-02",
+      "scenario": "dns-resolver-slow",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "not run in pilot",
+      "alerts_only": "correct"
+    },
+    {
+      "id": "INC-03",
+      "scenario": "switch-uplink-down",
+      "hide_tags": true,
+      "cause_has_alert": true,
+      "investigator": "correct",
+      "alerts_only": "correct"
+    },
+    {
+      "id": "INC-04",
+      "scenario": "core-router-packet-loss",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "not run in pilot",
+      "alerts_only": "correct"
+    },
+    {
+      "id": "INC-05",
+      "scenario": "noisy-estate-hidden-cause",
+      "hide_tags": false,
+      "cause_has_alert": false,
+      "investigator": "correct",
+      "alerts_only": "wrong"
+    },
+    {
+      "id": "INC-06",
+      "scenario": "switch-uplink-down",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "not run in pilot",
+      "alerts_only": "correct"
+    },
+    {
+      "id": "INC-07",
+      "scenario": "storage-latency",
+      "hide_tags": true,
+      "cause_has_alert": true,
+      "investigator": "correct",
+      "alerts_only": "correct"
+    },
+    {
+      "id": "INC-08",
+      "scenario": "storage-degraded-below-threshold",
+      "hide_tags": false,
+      "cause_has_alert": false,
+      "investigator": "correct",
+      "alerts_only": "wrong",
+      "comment": "Alerts-only blamed db-01 while guessing that storage might be behind it."
+    },
+    {
+      "id": "INC-09",
+      "scenario": "app-memory-leak",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "not run in pilot",
+      "alerts_only": "correct"
+    },
+    {
+      "id": "INC-10",
+      "scenario": "benign-cpu-spike",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "correct",
+      "alerts_only": "correct"
+    },
+    {
+      "id": "INC-11",
+      "scenario": "deploy-and-dns-concurrent",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "wrong",
+      "alerts_only": "wrong",
+      "comment": "Two faults. The investigator found the DNS fault but dismissed the deployment as unrelated, misled by a version metric that is sampled only every 5 minutes. Alerts-only made the opposite mistake: deployment found, DNS dismissed."
+    },
+    {
+      "id": "INC-12",
+      "scenario": "db-volume-full",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "not run in pilot",
+      "alerts_only": "correct"
+    },
+    {
+      "id": "INC-13",
+      "scenario": "hypervisor-02-contention",
+      "hide_tags": true,
+      "cause_has_alert": false,
+      "investigator": "correct",
+      "alerts_only": "wrong"
+    },
+    {
+      "id": "INC-14",
+      "scenario": "load-balancer-health-checks",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "not run in pilot",
+      "alerts_only": "correct",
+      "comment": "Alerts-only answer was \"web tier / lb-01\" at low confidence; scored correct leniently, as in M0."
+    },
+    {
+      "id": "INC-15",
+      "scenario": "external-dependency-not-monitored",
+      "hide_tags": false,
+      "cause_has_alert": false,
+      "investigator": "correct",
+      "alerts_only": "wrong",
+      "comment": "Alerts-only blamed the web tier at low confidence instead of saying undetermined; scored wrong on verdict."
+    },
+    {
+      "id": "INC-16",
+      "scenario": "storage-latency",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "not run in pilot",
+      "alerts_only": "correct"
+    },
+    {
+      "id": "INC-17",
+      "scenario": "access-switch-errors-below-threshold",
+      "hide_tags": false,
+      "cause_has_alert": false,
+      "investigator": "correct",
+      "alerts_only": "wrong"
+    },
+    {
+      "id": "INC-18",
+      "scenario": "hypervisor-cpu-contention",
+      "hide_tags": true,
+      "cause_has_alert": false,
+      "investigator": "correct",
+      "alerts_only": "wrong"
+    },
+    {
+      "id": "INC-19",
+      "scenario": "two-independent-faults",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "not run in pilot",
+      "alerts_only": "wrong",
+      "comment": "Alerts-only named both hosts but linked them as one fault."
+    },
+    {
+      "id": "INC-20",
+      "scenario": "resolved-link-flap-backlog",
+      "hide_tags": false,
+      "cause_has_alert": false,
+      "investigator": "correct",
+      "alerts_only": "wrong"
+    },
+    {
+      "id": "INC-21",
+      "scenario": "hypervisor-cpu-contention",
+      "hide_tags": false,
+      "cause_has_alert": false,
+      "investigator": "not run in pilot",
+      "alerts_only": "wrong"
+    },
+    {
+      "id": "INC-22",
+      "scenario": "cache-slow-burn",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "correct",
+      "alerts_only": "correct"
+    },
+    {
+      "id": "INC-23",
+      "scenario": "bad-deploy",
+      "hide_tags": false,
+      "cause_has_alert": true,
+      "investigator": "not run in pilot",
+      "alerts_only": "correct"
+    },
+    {
+      "id": "INC-24",
+      "scenario": "hypervisor-02-contention",
+      "hide_tags": false,
+      "cause_has_alert": false,
+      "investigator": "correct",
+      "alerts_only": "wrong"
+    }
+  ]
+}

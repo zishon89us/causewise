@@ -1,0 +1,86 @@
+{
+  "note": "Scored by hand against sim/scenarios.mjs. 'correct' means the answer names the true cause as the primary cause. Scorer: the AI agent that also wrote the scenarios; not independently reviewed.",
+  "scores": [
+    {
+      "id": "INC-01",
+      "scenario": "switch-uplink-down",
+      "investigator": "correct",
+      "alerts_only": "correct",
+      "zabbix80_window_rule": "debatable"
+    },
+    {
+      "id": "INC-02",
+      "scenario": "db-volume-full",
+      "investigator": "correct",
+      "alerts_only": "correct",
+      "zabbix80_window_rule": "correct"
+    },
+    {
+      "id": "INC-03",
+      "scenario": "hypervisor-cpu-contention",
+      "investigator": "correct",
+      "alerts_only": "wrong",
+      "comment": "Cause has no alert. Alerts-only blamed cache-01, a symptom.",
+      "zabbix80_window_rule": "wrong"
+    },
+    {
+      "id": "INC-04",
+      "scenario": "dns-resolver-slow",
+      "investigator": "correct",
+      "alerts_only": "correct",
+      "zabbix80_window_rule": "wrong"
+    },
+    {
+      "id": "INC-05",
+      "scenario": "storage-latency",
+      "investigator": "correct",
+      "alerts_only": "correct",
+      "zabbix80_window_rule": "correct"
+    },
+    {
+      "id": "INC-06",
+      "scenario": "app-memory-leak",
+      "investigator": "correct",
+      "alerts_only": "correct",
+      "comment": "Alerts-only named the right host but not the memory leak; the investigator found the leak and the crash loop.",
+      "zabbix80_window_rule": "correct"
+    },
+    {
+      "id": "INC-07",
+      "scenario": "bad-deploy",
+      "investigator": "correct",
+      "alerts_only": "correct",
+      "comment": "Investigator's cause is right (build 413 rollout) but it wrongly inferred that nodes still on 412 were failing; the version item is only sampled every 5 minutes, so it was reading stale values.",
+      "zabbix80_window_rule": "wrong"
+    },
+    {
+      "id": "INC-08",
+      "scenario": "core-router-packet-loss",
+      "investigator": "correct",
+      "alerts_only": "correct",
+      "zabbix80_window_rule": "wrong"
+    },
+    {
+      "id": "INC-09",
+      "scenario": "two-independent-faults",
+      "investigator": "correct",
+      "alerts_only": "wrong",
+      "comment": "Alerts-only named both hosts but blamed db-02 (the unrelated replica) for the slowdown. The investigator separated the two faults correctly.",
+      "zabbix80_window_rule": "correct"
+    },
+    {
+      "id": "INC-10",
+      "scenario": "load-balancer-health-checks",
+      "investigator": "correct",
+      "alerts_only": "correct",
+      "comment": "Investigator also listed the unrelated db-02 alert as a second low-confidence cause, while marking it unrelated.",
+      "zabbix80_window_rule": "correct"
+    }
+  ],
+  "totals": {
+    "investigator": "10/10",
+    "alerts_only": "8/10",
+    "zabbix80_window_rule": "5/10 (6/10 counting INC-01)"
+  },
+  "native_note": "zabbix80_window_rule: 'correct' means the true cause host is among the problems Zabbix 8.0 marked as a cause under a first-event-in-window rule (15-minute window, modelled as 45 s at 20x speed). It does not require that the symptoms were attached to it. INC-01 is 'debatable': Zabbix marked the router's link-down alert, which points at the failed link but not at dist-sw-02. In INC-07 every alert was attached to an unrelated, long-open alert on the lab's own 'Zabbix server' host."
+}

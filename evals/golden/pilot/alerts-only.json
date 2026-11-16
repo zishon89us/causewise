@@ -1,0 +1,279 @@
+{
+  "model": "claude-sonnet-5-5",
+  "answers": [
+    {
+      "incident": "INC-01",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "db-01",
+          "what": "Primary DB connection exhaustion (likely app connection leak or slow queries) is slowing the app and web tiers.",
+          "confidence": "medium"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-02",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "dns-01",
+          "what": "DNS server is overloaded (high CPU), so name resolution is slow and the app and web tiers are slow.",
+          "confidence": "high"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-03",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "core-rtr-01 / dist-sw-02",
+          "what": "The link between core-rtr-01 and dist-sw-02 is down (or dist-sw-02 failed), cutting off everything behind it (db, app, hv, cache), which causes the web 5xx errors.",
+          "confidence": "high"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-04",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "core-rtr-01",
+          "what": "Interface errors on the core router are causing widespread packet loss across all hosts.",
+          "confidence": "medium"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-05",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "cache-01",
+          "what": "The cache is slow or degraded, which slows the app and web tiers and backs up job queues.",
+          "confidence": "medium"
+        }
+      ],
+      "unrelated_alerts": [
+        "web-01: Disk space is low on /",
+        "db-02: High CPU utilization",
+        "app-04: High memory utilization"
+      ]
+    },
+    {
+      "incident": "INC-06",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "core-rtr-01 / dist-sw-02",
+          "what": "The link from core-rtr-01 to dist-sw-02 is down, isolating dist-sw-02 and the hosts behind it, which causes the 5xx errors.",
+          "confidence": "high"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-07",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "nas-01",
+          "what": "NAS storage latency is slowing db-01 disk I/O and queries, which slows the app and web tiers.",
+          "confidence": "high"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-08",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "db-01",
+          "what": "Disk I/O wait and slow queries on the primary DB (probably backing storage latency below threshold) are slowing the app and web tiers.",
+          "confidence": "medium"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-09",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "app-03",
+          "what": "Single app node is degraded, with slow responses and a backing-up job queue.",
+          "confidence": "low"
+        }
+      ],
+      "unrelated_alerts": [
+        "web-02: Disk space is low on /"
+      ]
+    },
+    {
+      "incident": "INC-10",
+      "verdict": "benign",
+      "causes": [],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-11",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "app tier",
+          "what": "A bad application deploy (version change) is producing database errors, 5xx responses and slowness.",
+          "confidence": "high"
+        }
+      ],
+      "unrelated_alerts": [
+        "dns-01: Slow DNS resolution",
+        "dns-01: High CPU utilization"
+      ]
+    },
+    {
+      "incident": "INC-12",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "db-01",
+          "what": "The primary DB volume is almost full, causing database write errors in the app, 5xx errors and replication lag.",
+          "confidence": "high"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-13",
+      "verdict": "undetermined",
+      "causes": [],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-14",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "web tier / lb-01",
+          "what": "Web backends failed load balancer health checks (fewer than 2 healthy), possibly a web service or health check issue, causing 5xx errors.",
+          "confidence": "low"
+        }
+      ],
+      "unrelated_alerts": [
+        "db-02: High CPU utilization"
+      ]
+    },
+    {
+      "incident": "INC-15",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "web tier",
+          "what": "All web nodes are returning 5xx, likely from a bad web deploy or config change or a web service failure, with no downstream alerts.",
+          "confidence": "low"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-16",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "nas-01",
+          "what": "NAS storage latency is slowing db-01 I/O and queries, which slows the app and web tiers.",
+          "confidence": "high"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-17",
+      "verdict": "undetermined",
+      "causes": [],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-18",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "cache-01",
+          "what": "The cache is slow, which slows the app and web tiers and backs up job queues.",
+          "confidence": "medium"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-19",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "db-02",
+          "what": "The replica DB is overloaded (CPU, slow queries, replication lag), possibly from a cache hit ratio drop pushing reads to the DB.",
+          "confidence": "low"
+        },
+        {
+          "host": "cache-01",
+          "what": "Low cache hit ratio may be pushing load to the database.",
+          "confidence": "low"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-20",
+      "verdict": "undetermined",
+      "causes": [],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-21",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "cache-01",
+          "what": "The cache is slow, which slows the app and web tiers and backs up job queues.",
+          "confidence": "medium"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-22",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "cache-01",
+          "what": "Cache memory pressure and a low hit ratio push load to db-01 (slow queries), which slows the app and web tiers.",
+          "confidence": "medium"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-23",
+      "verdict": "cause_found",
+      "causes": [
+        {
+          "host": "app tier",
+          "what": "A bad application deploy (version change) is causing database errors and web 5xx errors.",
+          "confidence": "high"
+        }
+      ],
+      "unrelated_alerts": []
+    },
+    {
+      "incident": "INC-24",
+      "verdict": "undetermined",
+      "causes": [],
+      "unrelated_alerts": []
+    }
+  ]
+}

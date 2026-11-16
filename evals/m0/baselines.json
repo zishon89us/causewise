@@ -1,0 +1,176 @@
+[
+  {
+    "id": "INC-01",
+    "truth": [
+      "dist-sw-02"
+    ],
+    "open_problems": 24,
+    "first": {
+      "host": "core-rtr-01",
+      "alert": "Link down: to dist-sw-02",
+      "correct": false
+    },
+    "first_in_15m": {
+      "host": "core-rtr-01",
+      "alert": "Link down: to dist-sw-02",
+      "correct": false
+    }
+  },
+  {
+    "id": "INC-02",
+    "truth": [
+      "db-01"
+    ],
+    "open_problems": 15,
+    "first": {
+      "host": "db-01",
+      "alert": "Database volume is almost full",
+      "correct": true
+    },
+    "first_in_15m": {
+      "host": "lb-01",
+      "alert": "High 5xx rate at load balancer",
+      "correct": false
+    }
+  },
+  {
+    "id": "INC-03",
+    "truth": [
+      "hv-01"
+    ],
+    "open_problems": 9,
+    "first": {
+      "host": "app-02",
+      "alert": "Slow application response",
+      "correct": false
+    },
+    "first_in_15m": {
+      "host": "app-02",
+      "alert": "Slow application response",
+      "correct": false
+    }
+  },
+  {
+    "id": "INC-04",
+    "truth": [
+      "dns-01"
+    ],
+    "open_problems": 10,
+    "first": {
+      "host": "web-04",
+      "alert": "Slow HTTP response",
+      "correct": false
+    },
+    "first_in_15m": {
+      "host": "web-04",
+      "alert": "Slow HTTP response",
+      "correct": false
+    }
+  },
+  {
+    "id": "INC-05",
+    "truth": [
+      "nas-01"
+    ],
+    "open_problems": 16,
+    "first": {
+      "host": "nas-01",
+      "alert": "High storage latency",
+      "correct": true
+    },
+    "first_in_15m": {
+      "host": "nas-01",
+      "alert": "High storage latency",
+      "correct": true
+    }
+  },
+  {
+    "id": "INC-06",
+    "truth": [
+      "app-03"
+    ],
+    "open_problems": 3,
+    "first": {
+      "host": "web-02",
+      "alert": "Disk space is low on /",
+      "correct": false
+    },
+    "first_in_15m": {
+      "host": "app-03",
+      "alert": "Slow application response",
+      "correct": true
+    }
+  },
+  {
+    "id": "INC-07",
+    "truth": [
+      "app-01",
+      "app-02",
+      "app-03",
+      "app-04"
+    ],
+    "open_problems": 9,
+    "first": {
+      "host": "app-01",
+      "alert": "Database errors in application",
+      "correct": true
+    },
+    "first_in_15m": {
+      "host": "app-01",
+      "alert": "Database errors in application",
+      "correct": true
+    }
+  },
+  {
+    "id": "INC-08",
+    "truth": [
+      "core-rtr-01"
+    ],
+    "open_problems": 20,
+    "first": {
+      "host": "app-04",
+      "alert": "High ICMP ping loss",
+      "correct": false
+    },
+    "first_in_15m": {
+      "host": "app-04",
+      "alert": "High ICMP ping loss",
+      "correct": false
+    }
+  },
+  {
+    "id": "INC-09",
+    "truth": [
+      "cache-01",
+      "db-02"
+    ],
+    "open_problems": 12,
+    "first": {
+      "host": "db-02",
+      "alert": "High CPU utilization",
+      "correct": true
+    },
+    "first_in_15m": {
+      "host": "db-02",
+      "alert": "High CPU utilization",
+      "correct": true
+    }
+  },
+  {
+    "id": "INC-10",
+    "truth": [
+      "lb-01"
+    ],
+    "open_problems": 3,
+    "first": {
+      "host": "db-02",
+      "alert": "High CPU utilization",
+      "correct": false
+    },
+    "first_in_15m": {
+      "host": "lb-01",
+      "alert": "Fewer than 2 healthy backends",
+      "correct": true
+    }
+  }
+]

@@ -1,0 +1,188 @@
+{
+  "lab": "8.0",
+  "speed": 20,
+  "modelled_window_s": 900,
+  "lab_window_s": 45,
+  "results": [
+    {
+      "id": "INC-01",
+      "open_problems": 25,
+      "marked_as_cause": [
+        {
+          "host": "Zabbix server",
+          "name": "Linux: Zabbix agent is not available (for 3m)",
+          "symptoms": 0
+        },
+        {
+          "host": "core-rtr-01",
+          "name": "Link down: to dist-sw-02",
+          "symptoms": 11
+        },
+        {
+          "host": "app-03",
+          "name": "High ICMP ping loss",
+          "symptoms": 11
+        }
+      ]
+    },
+    {
+      "id": "INC-02",
+      "open_problems": 16,
+      "marked_as_cause": [
+        {
+          "host": "Zabbix server",
+          "name": "Linux: Zabbix agent is not available (for 3m)",
+          "symptoms": 0
+        },
+        {
+          "host": "db-01",
+          "name": "Database volume is almost full",
+          "symptoms": 0
+        },
+        {
+          "host": "lb-01",
+          "name": "High 5xx rate at load balancer",
+          "symptoms": 13
+        }
+      ]
+    },
+    {
+      "id": "INC-03",
+      "open_problems": 10,
+      "marked_as_cause": [
+        {
+          "host": "Zabbix server",
+          "name": "Linux: Zabbix agent is not available (for 3m)",
+          "symptoms": 0
+        },
+        {
+          "host": "app-02",
+          "name": "Slow application response",
+          "symptoms": 8
+        }
+      ]
+    },
+    {
+      "id": "INC-04",
+      "open_problems": 11,
+      "marked_as_cause": [
+        {
+          "host": "Zabbix server",
+          "name": "Linux: Zabbix agent is not available (for 3m)",
+          "symptoms": 0
+        },
+        {
+          "host": "web-04",
+          "name": "Slow HTTP response",
+          "symptoms": 9
+        }
+      ]
+    },
+    {
+      "id": "INC-05",
+      "open_problems": 17,
+      "marked_as_cause": [
+        {
+          "host": "Zabbix server",
+          "name": "Linux: Zabbix agent is not available (for 3m)",
+          "symptoms": 0
+        },
+        {
+          "host": "nas-01",
+          "name": "High storage latency",
+          "symptoms": 15
+        }
+      ]
+    },
+    {
+      "id": "INC-06",
+      "open_problems": 4,
+      "marked_as_cause": [
+        {
+          "host": "Zabbix server",
+          "name": "Linux: Zabbix agent is not available (for 3m)",
+          "symptoms": 0
+        },
+        {
+          "host": "web-02",
+          "name": "Disk space is low on /",
+          "symptoms": 0
+        },
+        {
+          "host": "app-03",
+          "name": "Slow application response",
+          "symptoms": 1
+        }
+      ]
+    },
+    {
+      "id": "INC-07",
+      "open_problems": 10,
+      "marked_as_cause": [
+        {
+          "host": "Zabbix server",
+          "name": "Linux: Zabbix agent is not available (for 3m)",
+          "symptoms": 0
+        }
+      ]
+    },
+    {
+      "id": "INC-08",
+      "open_problems": 21,
+      "marked_as_cause": [
+        {
+          "host": "Zabbix server",
+          "name": "Linux: Zabbix agent is not available (for 3m)",
+          "symptoms": 0
+        },
+        {
+          "host": "app-04",
+          "name": "High ICMP ping loss",
+          "symptoms": 19
+        }
+      ]
+    },
+    {
+      "id": "INC-09",
+      "open_problems": 13,
+      "marked_as_cause": [
+        {
+          "host": "Zabbix server",
+          "name": "Linux: Zabbix agent is not available (for 3m)",
+          "symptoms": 0
+        },
+        {
+          "host": "db-02",
+          "name": "High CPU utilization",
+          "symptoms": 10
+        },
+        {
+          "host": "cache-01",
+          "name": "Low cache hit ratio",
+          "symptoms": 0
+        }
+      ]
+    },
+    {
+      "id": "INC-10",
+      "open_problems": 4,
+      "marked_as_cause": [
+        {
+          "host": "Zabbix server",
+          "name": "Linux: Zabbix agent is not available (for 3m)",
+          "symptoms": 0
+        },
+        {
+          "host": "db-02",
+          "name": "High CPU utilization",
+          "symptoms": 0
+        },
+        {
+          "host": "lb-01",
+          "name": "Fewer than 2 healthy backends",
+          "symptoms": 1
+        }
+      ]
+    }
+  ]
+}

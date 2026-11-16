@@ -1,0 +1,25 @@
+{
+  "incident": "INC-15",
+  "verdict": "undetermined",
+  "causes": [],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "app tier (app-01..04): resp.ms, queue depth, db.errors.rate=0, version 412 constant (no deploy)",
+    "db-01/db-02: conn count, slow queries, io wait, repl lag normal",
+    "cache-01: hit rate about 90%, resp 3 ms",
+    "nas-01 latency/iops normal",
+    "dist-sw-01 and core-rtr-01: uplinks up, if.errors under 1/s, no ICMP loss",
+    "hv-02: cpu ready 1.5%, cpu 46%",
+    "dns-01 normal",
+    "web hosts cpu/mem/disk normal; lb sees all 4 backends healthy"
+  ],
+  "evidence": [
+    "All four web hosts and lb-01 step from about 0.2% to about 27-32% 5xx at 21:34 (all alerts 21:35)",
+    "The step is simultaneous on all web nodes (web-01..04 on dist-sw-01 and hv-02), and lb.5xx.pct matches at about 29%",
+    "No metric in any other tier changed at 21:34; app/db/cache/network/storage are flat",
+    "No other alerts or earlier resolved events in the last 120 min",
+    "The web-tier 5xx is real but the monitoring data does not show why: probable web-tier-wide config/cert/upstream-routing change or an unmonitored dependency, not visible here"
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 7
+}

@@ -1,0 +1,30 @@
+{
+  "incident": "INC-20",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "dist-sw-01 (web tier uplink to core-rtr-01)",
+      "what": "The dist-sw-01 uplink went down for about 2 minutes from 17:34 to 17:36 and then recovered. During the outage the web tier (web-01 to web-04) lost connectivity and lb-01 had fewer than 2 healthy backends. All four app servers then took a sudden backlog of about 1400 jobs that is still draining slowly, which explains the current slow HTTP and app responses.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "db-01 or db-02 fault: cpu 24%, io wait 4%, slow queries 2.8/s, replication lag 1.3s, app db errors 0, all within the normal range",
+    "nas-01 storage: latency 3.6ms, flat",
+    "cache-01: hit rate 94%, response 4.7ms",
+    "hv-01 and hv-02 (hypervisors): cpu ready 2%",
+    "app-tier code or deploy: app.version stays at 412",
+    "dist-sw-02 and core-rtr-01 currently: no loss, links up",
+    "an ongoing network fault: ping loss and the link-down alert have all resolved"
+  ],
+  "evidence": [
+    "17:34:09 lb-01 had fewer than 2 healthy backends. 17:34:39 core-rtr-01 reported link down to dist-sw-01. Ping loss on dist-sw-01, hv-02 and web-01 to web-04 ran from 17:34 to 17:36. All of these resolved by 17:36:44.",
+    "app.queue.depth was normal (20 to 60) until 17:34:54. It stepped to about 1394 at 17:35:54 on app-01, and to about 1380 on app-03 at 17:36:15. It is draining only about 43 per minute, so it is still about 1265 at 17:39.",
+    "Slow-response and job-queue alerts fired from 17:36:46 on all 4 app and all 4 web hosts after the link recovered. web-01 http.resp.ms is 2468 and app-01 app.resp.ms is 1802.",
+    "db-01 db.conn.count rose from about 65 to 160 only at 17:39, a consequence of the backlog rather than a cause. db-01 cpu, io wait and slow-query rate stayed flat throughout.",
+    "Only the dist-sw-01 side showed a link event. dist-sw-02 (app and db tier) had no link event, so the app-tier backlog follows from the web-tier outage and retries. The monitoring data does not show why the link dropped (dist-sw-01 if.errors.rate stayed at 0.2 to 0.8 and was flat)."
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 24
+}

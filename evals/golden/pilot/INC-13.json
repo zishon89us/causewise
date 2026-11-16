@@ -1,0 +1,31 @@
+{
+  "incident": "INC-13",
+  "verdict": "cause_found",
+  "causes": [
+    {
+      "host": "hv-02",
+      "what": "The hypervisor hv-02 has CPU saturation and contention (CPU util ~96%, CPU ready ~30%) starting about 13:31. This starves the VMs on it, apparently web-03 and web-04, and makes their HTTP responses about 7x slower. The monitoring data does not show which workload on hv-02 is consuming the CPU.",
+      "confidence": "medium"
+    }
+  ],
+  "unrelated_alerts": [],
+  "ruled_out": [
+    "web-03/web-04 own CPU, memory and disk (normal, web-03 cpu 24%)",
+    "app tier (app.resp.ms 295-388 ms, db errors 0)",
+    "db-01/db-02 (conn count, replication lag and io wait normal)",
+    "cache-01 (hit 93.7%, 3.6 ms)",
+    "lb-01 (4 backends healthy, 5xx 0.06%)",
+    "network: core-rtr-01, dist-sw-01 and dist-sw-02 (links up, errors low, no ping loss)",
+    "nas-01 (latency 5.8 ms)",
+    "hv-01 (CPU ready 1.1%)",
+    "web-01 and web-02 (response time normal, ~430-470 ms)"
+  ],
+  "evidence": [
+    "Only 2 open problems: Slow HTTP response on web-03 (13:35:09) and web-04 (13:35:18). No other trigger events in the last 120 minutes.",
+    "web-03 http.resp.ms jumped from ~375 ms at 13:33 to ~2970 ms at 13:34 and stayed at 3000-3500 ms. web-04 reads 3080 ms at 13:39. web-01 and web-02 are unchanged at ~430-470 ms.",
+    "hv-02 hv.cpu.util.pct was ~40-52% for the previous 90 minutes and is 96.5% at 13:38. hv.cpu.ready.pct was 1-3% until 13:30 and jumped to 19% at 13:31:49, then 24-31% through 13:38. hv-01 ready is 1.09%.",
+    "The hv-02 CPU-ready jump (13:31:49) precedes the web-03/web-04 slowdown (13:34), consistent with the hypervisor being the cause. I assume web-03 and web-04 run on hv-02 because no host tags record topology."
+  ],
+  "model": "claude-sonnet-5-5",
+  "queries_counted": 13
+}
