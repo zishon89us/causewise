@@ -1,0 +1,20 @@
+{
+  "name": "causewise",
+  "version": "0.1.0",
+  "description": "On-call investigator for Zabbix: turns an incident into a diagnosis with evidence, delivered to chat.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --disable-warning=ExperimentalWarning --test \"test/**/*.test.ts\"",
+    "check": "npm run typecheck && npm test",
+    "e2e:lab": "node --disable-warning=ExperimentalWarning e2e/ingest-lab.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "7.0.2"
+  }
+}
