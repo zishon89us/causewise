@@ -28,6 +28,8 @@ services:
       DB_SERVER_HOST: db70
     depends_on:
       db70: { condition: service_healthy }
+    # Lets the webhook reach a receiver running on the Docker host.
+    extra_hosts: ["host.docker.internal:host-gateway"]
     ports: ["127.0.0.1:10070:10051"]
   web70:
     image: zabbix/zabbix-web-nginx-pgsql:alpine-7.0-latest
@@ -48,6 +50,8 @@ services:
       DB_SERVER_HOST: db80
     depends_on:
       db80: { condition: service_healthy }
+    # Lets the webhook reach a receiver running on the Docker host.
+    extra_hosts: ["host.docker.internal:host-gateway"]
     ports: ["127.0.0.1:10080:10051"]
   web80:
     image: zabbix/zabbix-web-nginx-pgsql:alpine-8.0-latest

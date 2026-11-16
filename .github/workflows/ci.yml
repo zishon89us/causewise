@@ -1,0 +1,24 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: docker build -t causewise:ci .
+      - name: Container starts and answers its health check
+        run: |
+          docker run -d --name cw -p 8787:8787 -e CAUSEWISE_WEBHOOK_SECRET=ci-secret-ci-secret-ci causewise:ci
+          for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8787/healthz && exit 0; sleep 1; done
+          docker logs cw; exit 1

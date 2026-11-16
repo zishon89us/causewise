@@ -1,0 +1,70 @@
+zabbix_export:
+  version: '8.0'
+  media_types:
+    - name: causewise
+      type: WEBHOOK
+      parameters:
+        - name: event_id
+          value: '{EVENT.ID}'
+        - name: event_name
+          value: '{EVENT.NAME}'
+        - name: event_update_status
+          value: '{EVENT.UPDATE.STATUS}'
+        - name: event_value
+          value: '{EVENT.VALUE}'
+        - name: host
+          value: '{HOST.HOST}'
+        - name: secret
+          value: CHANGE-ME
+        - name: severity
+          value: '{EVENT.NSEVERITY}'
+        - name: tags
+          value: '{EVENT.TAGSJSON}'
+        - name: trigger_id
+          value: '{TRIGGER.ID}'
+        - name: url
+          value: 'http://causewise.example:8787/v1/alerts'
+      script: |
+        // Zabbix webhook media type script for causewise.
+        // Runs inside Zabbix (Duktape, ES5). Posts one alert to the causewise
+        // receiver. Parameters are defined on the media type; see docs/install.md.
+        var p = JSON.parse(value);
+        
+        var required = ['url', 'secret', 'event_id', 'event_value', 'event_name', 'host'];
+        for (var i = 0; i < required.length; i++) {
+            if (!p[required[i]]) {
+                throw 'causewise: parameter "' + required[i] + '" is empty';
+            }
+        }
+        
+        var request = new HttpRequest();
+        request.addHeader('Content-Type: application/json');
+        request.addHeader('X-Causewise-Secret: ' + p.secret);
+        
+        var response = request.post(p.url, JSON.stringify({
+            event_id: p.event_id,
+            event_value: p.event_value,
+            event_update_status: p.event_update_status,
+            event_name: p.event_name,
+            severity: p.severity,
+            host: p.host,
+            trigger_id: p.trigger_id,
+            tags: p.tags
+        }));
+        
+        if (request.getStatus() !== 200) {
+            throw 'causewise: receiver answered ' + request.getStatus() + ': ' + response;
+        }
+        return 'OK';
+        
+      timeout: 10s
+      description: 'Sends trigger problems and recoveries to causewise.'
+      message_templates:
+        - event_source: TRIGGERS
+          operation_mode: PROBLEM
+          subject: '{EVENT.NAME}'
+          message: '{EVENT.ID}'
+        - event_source: TRIGGERS
+          operation_mode: RECOVERY
+          subject: '{EVENT.NAME}'
+          message: '{EVENT.ID}'
