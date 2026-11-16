@@ -29,12 +29,19 @@ live only in `sim/scenarios.mjs`.
 
 | Metric | Definition | Grader |
 | --- | --- | --- |
-| Cause accuracy | Verdict matches, and the true cause host (all of them, for independent faults) is named at medium or high confidence | Deterministic, from `truth` in the scenario |
-| False blame | A host that is not a cause is named at high confidence | Deterministic |
-| Unrelated separation | Older, unrelated alerts are listed as unrelated and not as causes | Deterministic |
+| Cause accuracy | Verdict matches; every fault is named (at any confidence); and no cause that points at nothing true is given at medium or high confidence | `src/eval/score.ts` |
+| False blame | A host that is not a cause is named at high confidence | `src/eval/score.ts` |
+| Unrelated separation | Older, unrelated alerts are listed as unrelated and not put forward as causes | `src/eval/score.ts` |
 | Evidence validity | Each evidence claim's numbers appear in the output of the query it cites | Deterministic check on recorded tool output |
 | Mechanism | The explanation of *what* is wrong matches the scenario summary | Model grader with a written rubric, validated against a hand-labelled set before use |
 | Cost and effort | Queries, tokens, cost and wall time per incident | Recorded |
+
+Cause accuracy counts a correct answer given at low confidence. The first
+draft required medium or high; that would have marked down the alerts-only
+baseline for hedging and widened the margin in the investigator's favour.
+
+The deterministic scorer reads only the host each cause names. It cannot
+tell whether the explanation is right; that is the mechanism metric.
 
 Baselines reported next to every score: first-alert rule, and the same
 model given only the alert list ("alerts-only").
@@ -47,6 +54,25 @@ model given only the alert list ("alerts-only").
 | All 24 | not run on all 24 | 12 of 24 |
 | Cause raises no alert | 9 of 9 run | 0 of 10 |
 | Cause raises an alert | 4 of 5 run | 12 of 14 |
+
+### The same answers, scored automatically
+
+`npm run score` re-scores the recorded answers with `src/eval/score.ts`:
+
+| Answers | Hand score | Automatic score |
+| --- | --- | --- |
+| M0 investigator | 10 of 10 | 10 of 10 |
+| M0 alerts-only | 8 of 10 | 9 of 10 |
+| Golden pilot investigator (14 incidents) | 13 of 14 | 13 of 14 |
+| Golden pilot alerts-only (24 incidents) | 12 of 24 | 13 of 24 |
+
+The two differences are the same scenario, two independent faults, in the
+alerts-only runs: the answer named both hosts but described them as one
+fault. The automatic scorer counts the hosts and passes it; the hand score
+failed it on the explanation. From here on the automatic score is the one
+reported, and it is the stricter test of the margin. No answer in any run
+blamed a wrong host at high confidence, and unrelated alerts were set
+aside in every incident that had them.
 
 The investigator was not rerun on the ten incidents that repeat M0
 scenarios; it scored 10 of 10 on those in M0, on a different replay.
@@ -86,8 +112,10 @@ family. A threshold changes only by its own pull request with reasons.
 5. **Injection.** Add a red-team set: instructions planted in alert names,
    tags and item values. Zero tool misuse is required.
 6. **Smaller and local models.** Not yet evaluated.
-7. **Automated scorer.** Scores are hand-assigned; the deterministic graders
-   above are to be written in M3, before any prompt work.
+7. **Mechanism and evidence graders.** Cause accuracy, false blame and
+   unrelated separation are automated. Evidence validity and the mechanism
+   grader are not written yet; they need the tool output the agent loop
+   will record.
 
 ## Process
 

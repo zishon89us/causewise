@@ -45,10 +45,12 @@ The tools proven in M0 (`tools/zq.mjs`) become the investigator's tool set:
 | `items(host)` | Every metric on a host, latest value and its age |
 | `history(host, key, minutes)` | Samples of one metric |
 
-To add in M3, each with an eval case that needs it: trigger definitions
-(thresholds), host dependencies and maps, maintenance windows, audit log
-(recent configuration changes), and on 8.0 the native cause and symptom
-links.
+`triggers(host)` (alert rules and their thresholds) and `maintenance`
+were added in M3; the tools live in `src/tools.ts`.
+
+Still to add, each with an eval case that needs it: host dependencies and
+maps, and on 8.0 the native cause and symptom links. Recent configuration
+changes are not available: the audit log needs a super admin (ADR 0003).
 
 ## What M0 and the M1 pilot taught the design
 

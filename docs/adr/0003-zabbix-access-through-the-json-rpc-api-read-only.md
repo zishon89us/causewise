@@ -11,13 +11,21 @@ The investigator needs problems, events, hosts, items and history. Zabbix 8.0 al
 - Direct database access.
 
 ## Decision
-JSON-RPC API on 7.0 and 8.0, through one client with an allow-list of read methods (`event.get`, `problem.get`, `host.get`, `item.get`, `history.get`, `trigger.get`, `maintenance.get`, `auditlog.get`). Operators are told to create a read-only role; the allow-list protects them if they do not.
+JSON-RPC API on 7.0 and 8.0, through one client (`src/zabbix/client.ts`) with an allow-list of six read methods: `event.get`, `history.get`, `host.get`, `item.get`, `maintenance.get`, `trigger.get`. Any other method is refused before a request is made.
 
-## Verified in the lab (7.0.32 and 8.0.0)
-Bearer authentication with a session token from `user.login`, `event.get`, `host.get`, `item.get` and `history.get` on both versions; `problem.get`, `ceprule.get` and the `cause_eventid` field on 8.0 only.
+Operators create a dedicated Zabbix role whose API access is an allow-list of the same six methods, and a user with that role and read-only permission on the monitored host groups. `tools/lab-readonly-token.mjs` does this in the lab; `docs/install.md` gives the steps.
+
+## Verified in the lab (7.0.32 and 8.0.0), 2026-11-16
+- API tokens with Bearer authentication, and all six methods, on both versions (`npm run e2e:tools`).
+- With the dedicated role, Zabbix itself refuses `history.push`, `event.acknowledge`, `host.update`, `host.delete`, `user.get` and `script.execute` on both versions.
+- **A plain "read-only" user is not read-only.** On 7.0, a user with the built-in "User role" and read-only host permissions successfully called `history.push`, writing a value into a metric. The dedicated role closes that.
+- On 8.0, the built-in "User role" cannot call the API at all; a role with API access enabled is required.
+- `auditlog.get` needs a super admin, so recent configuration changes are not available to a least-privilege user. It is dropped from the tool set.
+- On 8.0: `ceprule.get` and the `cause_eventid` field exist (seen with an admin session; not on the allow-list yet).
 
 ## Assumptions, not yet verified
-API tokens (as opposed to session tokens) and binding one to a read-only role; `problem.get` on 7.0; `trigger.get`, `maintenance.get` and `auditlog.get` behaviour; anything about the MCP server, which has not been tested and is deferred.
+- `maintenance.get` returns sensible data when a window exists; the lab has none, so only the empty case and a unit test against a fake cover it.
+- Anything about the 8.0 MCP server, which has not been tested and is deferred.
 
 ## Consequences
-One code path for both versions. The MCP server can be added later as a second transport behind the same tool interface.
+One code path for both versions, and two independent layers keep the investigator read-only. Native 8.0 cause and symptom links need `event.get` fields only, so they can be added without widening the allow-list. The MCP server can be added later as a second transport behind the same tool interface.
